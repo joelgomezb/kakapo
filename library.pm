@@ -12,7 +12,7 @@ sub adios {
 					engine => 'Festival', 
 					avatar => undef, 
 					language => 'es', 
-					voice => 'JAndalucia_Indisys_MP_es_sf_diphone', 
+					voice => 'JuntaDeAndalucia_es_pa_diphone', 
 					async => 0, 
 				       );
 	    $ss->speak( $_[0] || "test" );
@@ -26,7 +26,7 @@ sub tts {
         my $ss = Speech::Synthesis->new(
 					engine => 'Festival', 
 					avatar => undef, language => 'es', 
-					voice => 'JAndalucia_Indisys_MP_es_sf_diphone', 
+					voice => 'JuntaDeAndalucia_es_pa_diphone', 
 					async => 0, 
 				       );
 	    $ss->speak( $_[0] || "test" );
