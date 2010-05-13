@@ -1,0 +1,63 @@
+# Script ejemplo de instalación de Kakapo :            
+#
+# Instalar los modulos PERL:                           
+sudo cpan -i Speech::Synthesis YAML                    
+#
+# Método alternativo de instalación                     
+# Entrar a CPAN:                                        
+# sudo cpan                                             
+# cpan[n]> install YAML                                 
+# cpan[n]> install Speech::Synthesis                    
+# cpan[n]> exit                                         
+#
+# Descargar la voz a utilizar:                           
+wget http://forja.guadalinex.org/repositorio/frs/download.php/153/festvox-palpc16k_1.0-1_all.deb
+#
+#Instalar la voz:
+sudo dpkg -i festvox-palpc16k_1.0-1_all.deb
+#
+# Para poder compilar los modulos de perl:              
+sudo aptitude install -y make build-essential           
+#
+# Instalar gladexml: para visualizar la ventana en gtk:
+sudo aptitude install -y libgtk2-gladexml-perl         
+#
+# Instalar Festival: servidor de sistesis de voz     
+sudo aptitude install -y festival                    
+#
+# Instalar GIT: para descargar codigo fuente de Kakapo
+sudo aptitude install -y git-core                     
+#
+# Descargando Kakapo usando GIT:
+git clone git://github.com/joelgomezb/kakapo.git
+#
+cd kakapo
+gedit library.pm
+# Cambiar: 'JAndalucia_Indisys_MP_es_sf_diphone' (línea 15 y 29) por:
+# 'JuntaDeAndalucia_es_pa_diphone' (Guardar y salir).
+# Iniciar servidor Festival
+festival --server
+# 
+# -------------- #
+# En otra cónsola:
+cd kakapo
+perl main.pl
+# 
+# Hasta el sistema ya debería estar hablandonos.
+# Si nos da el error:
+# Linux: can't open /dev/dsp
+# Paso 1: Bajar el servidor (Basta con crtl+c)
+# Crear el siguiente archivo
+gedit $HOME/.festivalrc
+# Escribe en ese archivo lo siguiente
+(Parameter.set 'Audio_Command "aplay -q -c 1 -t raw -f s16 -r $SR $FILE")
+(Parameter.set 'Audio_Method 'Audio_Command)
+
+# Guardar y salir
+# Correr de nuevo el servidor y ejecutar la aplicación
+#
+# Esta pequeña Guia fue elaborada por: 
+# Héctor Guzmán (guzman6001) Usando Ubuntu 10.04
+# Email: guzman6001@gmail.com
+# Página: http:reprasol.blogspot.com
+# Twitter: @guzman6001
