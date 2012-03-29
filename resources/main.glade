@@ -213,10 +213,14 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkComboBox" id="combobox1">
+              <widget class="GtkComboBox" id="voices">
                 <property name="width_request">123</property>
                 <property name="height_request">37</property>
                 <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="tearoff_title">aa</property>
+                <property name="items" translatable="yes"></property>
               </widget>
               <packing>
                 <property name="x">162</property>

@@ -18,3 +18,12 @@ WriteMakefile(
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Kakapo-*' },
 );
+
+requires 'Speech::Synthesis';
+requires 'Gtk2::Ex::Simple::List';
+requires 'Gtk2::GladeXML';
+requires 'Speech::Synthesis';
+requires 'Config::General';
+requires 'File::Slurp';
+requires 'Encode;
+

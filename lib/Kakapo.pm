@@ -55,8 +55,28 @@ sub new {
 sub run {
   my ( $self ) = @_;
 #  $self->{vta_login}->show;
+  $self->begin;
   $self->{ventana_principal}->show;
+  $self->{ventana_principal}->signal_connect('delete_event' => sub { Gtk2->main_quit; });
   Gtk2->main;
+}
+
+sub begin {
+	my ( $self ) = @_;
+
+# tengo que verificar que el proceso de festival  esté corriendo
+	my $engine = 'Festival';
+	my @voices = Speech::Synthesis->InstalledVoices(engine => $engine);
+# tengo que verificar la lista de voces de festival instaladas
+
+#	$self->{voices}->clear();
+	$self->{voices}->new_text();
+	foreach (@voices) {
+		$self->{voices}->append_text($_->{name});
+	}
+
+
+
 }
 
 #sub on_bcerrar_clicked {
