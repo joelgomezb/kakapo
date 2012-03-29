@@ -9,6 +9,7 @@ use Speech::Synthesis;
 use Config::General;
 use File::Slurp;
 use base qw( Gtk2::GladeXML::Simple );
+use Encode;
 
 =head1 NAME
 
@@ -58,17 +59,6 @@ sub run {
   Gtk2->main;
 }
 
-#my ( $programa, $ventana_principal, $vista_text, $file, $buffer_file, $texto, $voz );
-
-#	$programa 		= 	Gtk2::GladeXML->new('main.glade');
-#	$ventana_principal 	= 	$programa->get_widget('ventana_principal');
-#	$file 			= 	$programa->get_widget('filechooserbutton1');
-#	$vista_text 		= 	$programa->get_widget('textview1');
-#	$voz	 		= 	$programa->get_widget('combobox1');
-#	$programa->signal_autoconnect_from_package('main');
-
-#Gtk2->main;
-
 #sub on_bcerrar_clicked {
 #	rutinas::adios("Adios mi amigo");
 #        Gtk2->main_quit;
@@ -84,11 +74,10 @@ sub on_filechooserbutton1_file_set {
 	my $vista_text;
 	my $buffer_file = Gtk2::TextBuffer->new;
 	my $file = $self->{filechooserbutton1}->get_filename;
-#	my $archivo_seleccionado = $self->get_filename;
 	open(LISTA, $file) || die(rutinas::tts("No se pudo abrir el archivo"));
 	while(<LISTA>){
 		$buffer_file->insert_at_cursor($_);
-		$texto .= $_;
+		$texto .= encode( "utf8" , $_ );
 	}
 	close(LISTA);	
 	$self->{textview1}->set_buffer($buffer_file);
