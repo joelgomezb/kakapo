@@ -78,17 +78,32 @@ sub run {
 #	rutinas::tts($texto);
 #}
 
-#sub on_filechooserbutton1_file_set {
-#	$buffer_file = Gtk2::TextBuffer->new;
-#	my $archivo_seleccionado = $file->get_filename;
-#	open(LISTA, $archivo_seleccionado) || die(rutinas::tts("No se pudo abrir el archivo"));
-#	while(<LISTA>){
-#		$buffer_file->insert_at_cursor($_);
-#		$texto .= $_;
-#	}
-#	close(LISTA);	
-#	$vista_text->set_buffer($buffer_file);
-#}
+sub on_filechooserbutton1_file_set {
+	my $self = shift;
+	my $texto;
+	my $vista_text;
+	my $buffer_file = Gtk2::TextBuffer->new;
+	my $file = $self->{filechooserbutton1}->get_filename;
+#	my $archivo_seleccionado = $self->get_filename;
+	open(LISTA, $file) || die(rutinas::tts("No se pudo abrir el archivo"));
+	while(<LISTA>){
+		$buffer_file->insert_at_cursor($_);
+		$texto .= $_;
+	}
+	close(LISTA);	
+	$self->{textview1}->set_buffer($buffer_file);
+}
+
+sub gtk_main_quit {
+  Gtk2->main_quit;
+}
+
+sub on_bcerrar_clicked {
+  my $self = shift;
+
+  $self->gtk_main_quit;
+}
+
 sub function1 {
 }
 
