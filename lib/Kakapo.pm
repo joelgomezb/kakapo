@@ -67,14 +67,15 @@ sub begin {
 # tengo que verificar que el proceso de festival  esté corriendo
 	my $engine = 'Festival';
 	my @voices = Speech::Synthesis->InstalledVoices(engine => $engine);
+
 # tengo que verificar la lista de voces de festival instaladas
 
-#	$self->{voices}->clear();
 	$self->{voices}->new_text();
 	foreach (@voices) {
 		$self->{voices}->append_text($_->{name});
 	}
 
+	$self->{voices}->set_active(0);
 
 
 }
