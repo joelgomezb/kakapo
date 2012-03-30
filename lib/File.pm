@@ -1,16 +1,18 @@
-package Kakapo;
+package File;
 
 use strict;
 use warnings;
-use Gtk2 '-init';
-use Gtk2::Ex::Simple::List;
-use Gtk2::GladeXML;
 use Speech::Synthesis;
-use Config::General;
 use File::Slurp;
-use base qw( Gtk2::GladeXML::Simple );
 use Encode;
-use File qw(load_file);
+use File::Temp qw/ tempfile/;
+use Exporter;
+use Switch;
+use Text::FromAny;
+use Data::Dumper;
+
+our @ISA = qw(Exporter);
+our @EXPORT = qw(load_file);
 
 =head1 NAME
 
@@ -46,72 +48,27 @@ if you don't export anything, such as for a purely object-oriented module.
 =head2 function1
 
 =cut
+sub load_file {
+	my ( $self, $file ) = @_;
 
-sub new {
-  my $class = shift;
-  my $self = $class->SUPER::new( File::Spec->rel2abs(File::Spec->curdir()) . '/resources/main.glade' );
-  return $self;
-}
-
-sub run {
-  my ( $self ) = @_;
-#  $self->{vta_login}->show;
-  $self->begin;
-  $self->{ventana_principal}->show;
-  $self->{ventana_principal}->signal_connect('delete_event' => sub { Gtk2->main_quit; });
-  Gtk2->main;
-}
-
-sub begin {
-	my ( $self ) = @_;
-
-# tengo que verificar que el proceso de festival  esté corriendo
-	my $engine = 'Festival';
-	my @voices = Speech::Synthesis->InstalledVoices(engine => $engine);
-
-# tengo que verificar la lista de voces de festival instaladas
-
-	$self->{voices}->new_text();
-	foreach (@voices) {
-		$self->{voices}->append_text($_->{name});
+	my $TypeFile = Text::FromAny->new(file => $file);
+	switch ( $TypeFile ) {
+		case  "Cleartext" { txt ( $self, $file ); }
+		else {	print Dumper("Formato aun no soportado!!! :("); }
 	}
-
-	$self->{voices}->set_active(0);
-
-
 }
 
-#sub on_hablar_clicked {
-#	my ( $self ) = @_;
-#		($texto);
-#}
-use Data::Dumper;
-sub on_filechooserbutton1_file_set {
-	my $self = shift;
+sub txt {
+	my ( $self, $file) = @_;
 
 	my $buffer_file = Gtk2::TextBuffer->new;
-	my $file = $self->{filechooserbutton1}->get_filename;
-	load_file( $self, $file );
-}
-
-sub gtk_main_quit {
-  Gtk2->main_quit;
-}
-
-sub on_bcerrar_clicked {
-  my $self = shift;
-
-  $self->gtk_main_quit;
-}
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
+			open(LISTA, $file) || die(rutinas::tts("No se pudo abrir el archivo"));
+			while(<LISTA>){
+				$buffer_file->insert_at_cursor($_);
+				my $texto .= encode( "utf8" , $_ );
+			}
+			close(LISTA);	
+			$self->{textview1}->set_buffer($buffer_file);
 }
 
 =head1 AUTHOR

@@ -25,5 +25,8 @@ requires 'Gtk2::GladeXML';
 requires 'Speech::Synthesis';
 requires 'Config::General';
 requires 'File::Slurp';
-requires 'Encode;
-
+requires 'Encode';
+requires 'File::Slurp';
+requires 'Exporter';
+requires 'File::Temp';
+requires 'Switch';
