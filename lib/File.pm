@@ -8,8 +8,8 @@ use Encode;
 use File::Temp qw/ tempfile/;
 use Exporter;
 use Switch;
-use Text::FromAny;
 use Data::Dumper;
+
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(load_file);
@@ -51,9 +51,8 @@ if you don't export anything, such as for a purely object-oriented module.
 sub load_file {
 	my ( $self, $file ) = @_;
 
-	my $TypeFile = Text::FromAny->new(file => $file);
-	switch ( $TypeFile ) {
-		case  "Cleartext" { txt ( $self, $file ); }
+	switch ( $file ) {
+		case  /.txt/ { txt ( $self, $file ); }
 		else {	print Dumper("Formato aun no soportado!!! :("); }
 	}
 }
