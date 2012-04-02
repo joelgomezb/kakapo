@@ -69,8 +69,9 @@ sub txt {
 				write_file( "/tmp/kakapo.tmp", {binmode => ':utf8' }, decode ("utf8", $_ ) );
 			}
 			close(LISTA);	
-	$self->{textview1}->set_buffer($buffer_file);
+	$self->{text}->set_buffer($buffer_file);
 	$self->{ejecutar}->set_sensitive(1);
+	$self->{convertir}->set_sensitive(1);
 }
 
 =head1 AUTHOR
