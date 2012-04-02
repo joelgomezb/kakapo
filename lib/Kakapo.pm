@@ -10,6 +10,7 @@ use Config::General;
 use File::Slurp;
 use base qw( Gtk2::GladeXML::Simple );
 use Encode;
+use TTS;
 use File qw(load_file);
 
 =head1 NAME
@@ -65,6 +66,7 @@ sub run {
 sub begin {
 	my ( $self ) = @_;
 
+	$self->{ejecutar}->set_sensitive(0);
 # tengo que verificar que el proceso de festival  esté corriendo
 	my $engine = 'Festival';
 	my @voices = Speech::Synthesis->InstalledVoices(engine => $engine);
@@ -81,10 +83,11 @@ sub begin {
 
 }
 
-#sub on_hablar_clicked {
-#	my ( $self ) = @_;
-#		($texto);
-#}
+sub on_hablar_clicked {
+	my ( $self ) = @_;
+		play( $self );
+}
+
 use Data::Dumper;
 sub on_filechooserbutton1_file_set {
 	my $self = shift;
@@ -92,6 +95,13 @@ sub on_filechooserbutton1_file_set {
 	my $buffer_file = Gtk2::TextBuffer->new;
 	my $file = $self->{filechooserbutton1}->get_filename;
 	load_file( $self, $file );
+}
+
+sub on_imagemenuitem2_activate {
+	my $self = shift;
+	$self->{filechooserdialog1}->show();
+	print Dumper($self->{filechooserbutton1}->get_filename);
+#	$self->on_filechooserbutton1_file_set();
 }
 
 sub gtk_main_quit {
