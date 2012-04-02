@@ -5,7 +5,7 @@ use warnings;
 use Speech::Synthesis;
 use File::Slurp;
 use Encode;
-use File::Temp qw/ tempfile/;
+use IO::File;
 use Exporter;
 use Switch;
 use Data::Dumper;
@@ -51,6 +51,8 @@ if you don't export anything, such as for a purely object-oriented module.
 sub load_file {
 	my ( $self, $file ) = @_;
 
+	my $fh = IO::File->new("/tmp/kakapo.tmp", "w");
+
 	switch ( $file ) {
 		case  /.txt/ { txt ( $self, $file ); }
 		else {	print Dumper("Formato aun no soportado!!! :("); }
@@ -58,16 +60,17 @@ sub load_file {
 }
 
 sub txt {
-	my ( $self, $file) = @_;
+	my ( $self, $file ) = @_;
 
 	my $buffer_file = Gtk2::TextBuffer->new;
 			open(LISTA, $file) || die(rutinas::tts("No se pudo abrir el archivo"));
 			while(<LISTA>){
-				$buffer_file->insert_at_cursor($_);
-				my $texto .= encode( "utf8" , $_ );
+				$buffer_file->insert_at_cursor( decode("utf8", $_) );
+				write_file( "/tmp/kakapo.tmp", {binmode => ':utf8' }, decode ("utf8", $_ ) );
 			}
 			close(LISTA);	
-			$self->{textview1}->set_buffer($buffer_file);
+	$self->{textview1}->set_buffer($buffer_file);
+	$self->{ejecutar}->set_sensitive(1);
 }
 
 =head1 AUTHOR
