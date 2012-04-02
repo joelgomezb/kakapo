@@ -12,7 +12,7 @@ use Data::Dumper;
 
 
 our @ISA = qw(Exporter);
-our @EXPORT = qw(play);
+our @EXPORT = qw( convert );
 
 =head1 NAME
 
@@ -48,12 +48,15 @@ if you don't export anything, such as for a purely object-oriented module.
 =head2 function1
 
 =cut
-sub play {
+sub convert {
 	my ( $self ) = @_;
 	
-	my $cmd = "text2wave /tmp/kakapo.tmp -o /home/jgomez/Escritorio/prop.wav";
+	my $voice = "voice_".$self->{voices}->get_active_text;
+	my $cmd = "text2wave /tmp/kakapo.tmp -o /home/jgomez/Escritorio/prop.wav -eval '($voice)'";
 	system($cmd);
-	unlink("/tmp/kakapo.temp");
+	
+	unlink("/tmp/kakapo.tmp");
+	$self->{vta_converted}->show;
 }
 
 
