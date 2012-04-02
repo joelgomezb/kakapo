@@ -67,6 +67,7 @@ sub begin {
 	my ( $self ) = @_;
 
 	$self->{ejecutar}->set_sensitive(0);
+	$self->{convertir}->set_sensitive(0);
 # tengo que verificar que el proceso de festival  esté corriendo
 	my $engine = 'Festival';
 	my @voices = Speech::Synthesis->InstalledVoices(engine => $engine);
@@ -85,7 +86,7 @@ sub begin {
 
 sub on_hablar_clicked {
 	my ( $self ) = @_;
-		play( $self );
+		convert( $self );
 }
 
 use Data::Dumper;
@@ -102,6 +103,12 @@ sub on_imagemenuitem2_activate {
 	$self->{filechooserdialog1}->show();
 	print Dumper($self->{filechooserbutton1}->get_filename);
 #	$self->on_filechooserbutton1_file_set();
+}
+
+sub on_bt_aceptar_clicked {
+	my ( $self ) = @_;
+
+	$self->{vta_converted}->hide;
 }
 
 sub gtk_main_quit {
