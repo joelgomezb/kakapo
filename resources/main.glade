@@ -1,16 +1,12 @@
 <?xml version="1.0"?>
 <glade-interface>
-  <!-- interface-requires gtk+ 2.12 -->
+  <!-- interface-requires gtk+ 2.16 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="ventana_principal">
     <property name="visible">True</property>
-    <property name="can_focus">True</property>
-    <property name="has_focus">True</property>
-    <property name="is_focus">True</property>
     <property name="title" translatable="yes">Kakapo</property>
+    <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="skip_taskbar_hint">True</property>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -167,8 +163,8 @@
                 <signal name="clicked" handler="on_bcerrar_clicked"/>
               </widget>
               <packing>
-                <property name="x">496</property>
-                <property name="y">236</property>
+                <property name="x">848</property>
+                <property name="y">567</property>
               </packing>
             </child>
             <child>
@@ -180,8 +176,8 @@
                 <signal name="file_activated" handler="on_filechooserbutton1_file_activated"/>
               </widget>
               <packing>
-                <property name="x">27</property>
-                <property name="y">235</property>
+                <property name="x">29</property>
+                <property name="y">567</property>
               </packing>
             </child>
             <child>
@@ -198,21 +194,8 @@
                 <signal name="clicked" handler="on_hablar_clicked"/>
               </widget>
               <packing>
-                <property name="x">343</property>
-                <property name="y">236</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkTextView" id="textview1">
-                <property name="width_request">547</property>
-                <property name="height_request">190</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="editable">False</property>
-              </widget>
-              <packing>
-                <property name="x">22</property>
-                <property name="y">10</property>
+                <property name="x">510</property>
+                <property name="y">567</property>
               </packing>
             </child>
             <child>
@@ -229,8 +212,46 @@
                 <property name="items" translatable="yes"></property>
               </widget>
               <packing>
-                <property name="x">162</property>
-                <property name="y">237</property>
+                <property name="x">172</property>
+                <property name="y">567</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="convertir">
+                <property name="label">gtk-convert</property>
+                <property name="width_request">135</property>
+                <property name="height_request">36</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <property name="focus_on_click">False</property>
+              </widget>
+              <packing>
+                <property name="x">670</property>
+                <property name="y">567</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkScrolledWindow" id="scroll">
+                <property name="width_request">941</property>
+                <property name="height_request">500</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <widget class="GtkTextView" id="text">
+                    <property name="width_request">466</property>
+                    <property name="height_request">214</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="editable">False</property>
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="x">12</property>
+                <property name="y">23</property>
               </packing>
             </child>
           </widget>
@@ -290,6 +311,45 @@
             <property name="expand">False</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+      </widget>
+    </child>
+  </widget>
+  <widget class="GtkWindow" id="vta_converted">
+    <property name="title" translatable="yes">Kakapo</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <child>
+      <widget class="GtkFixed" id="fixed1">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkLabel" id="label1">
+            <property name="width_request">156</property>
+            <property name="height_request">43</property>
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Conversi&#xF3;n Finalizada</property>
+          </widget>
+          <packing>
+            <property name="x">25</property>
+            <property name="y">5</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="bt_aceptar">
+            <property name="label">gtk-ok</property>
+            <property name="width_request">100</property>
+            <property name="height_request">39</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+            <signal name="clicked" handler="on_bt_aceptar_clicked"/>
+          </widget>
+          <packing>
+            <property name="x">48</property>
+            <property name="y">45</property>
           </packing>
         </child>
       </widget>
