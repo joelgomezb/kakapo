@@ -86,7 +86,10 @@ sub begin {
 
 sub on_hablar_clicked {
 	my ( $self ) = @_;
-		convert( $self );
+	
+		my $buffer_file = Gtk2::TextBuffer->new;
+		my $file = $self->{filechooserbutton1}->get_filename;
+		convert( $self, $file );
 }
 
 use Data::Dumper;
