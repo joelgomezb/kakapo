@@ -9,6 +9,7 @@ use File::Temp qw/ tempfile/;
 use Exporter;
 use Switch;
 use Data::Dumper;
+use File qw( load_file );
 
 
 our @ISA = qw(Exporter);
@@ -49,8 +50,9 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =cut
 sub convert {
-	my ( $self ) = @_;
+	my ( $self, $file ) = @_;
 	
+	load_file( $self, $file ) unless ( -e "/tmp/kakapo.tmp" );
 	my $voice = "voice_".$self->{voices}->get_active_text;
 	my $cmd = "text2wave /tmp/kakapo.tmp -o /home/jgomez/Escritorio/prop.wav -eval '($voice)'";
 	system($cmd);
