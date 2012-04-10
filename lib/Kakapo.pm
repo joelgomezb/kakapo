@@ -68,11 +68,14 @@ sub begin {
 
 	$self->{ejecutar}->set_sensitive(0);
 	$self->{convertir}->set_sensitive(0);
+
 # tengo que verificar que el proceso de festival  esté corriendo
+	system("killall festival");
+	my @process = `ps -eaf | grep festival | awk \'{print \$2}\'`;
+	system " (festival --server)  &" if ( @process <= 1 );
+
 	my $engine = 'Festival';
 	my @voices = Speech::Synthesis->InstalledVoices(engine => $engine);
-
-# tengo que verificar la lista de voces de festival instaladas
 
 	$self->{voices}->new_text();
 	foreach (@voices) {
