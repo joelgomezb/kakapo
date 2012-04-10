@@ -9,6 +9,8 @@ use IO::File;
 use Exporter;
 use Switch;
 use Data::Dumper;
+use Glib qw{ TRUE FALSE };
+use Gtk2 '-init';
 
 
 our @ISA = qw(Exporter);
@@ -63,13 +65,24 @@ sub txt {
 	my ( $self, $file ) = @_;
 
 	my $buffer_file = Gtk2::TextBuffer->new;
-			open(LISTA, $file) || die(rutinas::tts("No se pudo abrir el archivo"));
+			open(LISTA, $file) || die("tu madre");
 			while(<LISTA>){
 				$buffer_file->insert_at_cursor( decode("utf8", $_) );
-				write_file( "/tmp/kakapo.tmp", {binmode => ':utf8' }, decode ("utf8", $_ ) );
+				write_file( "/tmp/kakapo.tmp", { binmode => ':utf8' , append => 1 }, decode ("utf8", $_ ) );
 			}
 			close(LISTA);	
-	$self->{text}->set_buffer($buffer_file);
+
+		Glib::Timeout->add(1000, sub {
+				open ARCHIVO, "</tmp/kakapo.tmp";
+				my @archivo = <ARCHIVO>;
+				$buffer_file->set_text(decode ( "utf8", "@archivo" ) );
+				$self->{text}->set_buffer($buffer_file);
+				my $end_mark = $buffer_file->create_mark('end', $buffer_file->get_end_iter, FALSE);
+				$self->{text}->scroll_to_mark ($end_mark, 0.0, TRUE, 0.0, 1.0);
+				close (ARCHIVO);
+		});
+
+
 	$self->{ejecutar}->set_sensitive(1);
 	$self->{convertir}->set_sensitive(1);
 }
