@@ -11,6 +11,7 @@ use Switch;
 use Data::Dumper;
 use Glib qw{ TRUE FALSE };
 use Gtk2 '-init';
+use File::MimeInfo;
 
 
 our @ISA = qw(Exporter);
@@ -55,10 +56,21 @@ sub load_file {
 
 	my $fh = IO::File->new("/tmp/kakapo.tmp", "w");
 
-	switch ( $file ) {
-		case  /.txt/ { txt ( $self, $file ); }
-		else {	print Dumper("Formato aun no soportado!!! :("); }
-	}
+	my $mime_type = mimetype( $file );
+	print Dumper($mime_type);
+	switch ( $mime_type ) {
+		case  /^text/ { txt ( $self, $file ); }
+		else {		
+				my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
+                                      'destroy-with-parent',
+                                      'error',
+                                      'ok',
+                                      "Tipo de Archivo no Soportado");
+				my $resp = $dialog->run;
+				$dialog->destroy if ( $resp eq "ok" );
+				return 0;
+			}
+	 }
 }
 
 sub txt {
@@ -79,8 +91,8 @@ sub txt {
 				$self->{text}->set_buffer($buffer_file);
 				my $end_mark = $buffer_file->create_mark('end', $buffer_file->get_end_iter, FALSE);
 				$self->{text}->scroll_to_mark ($end_mark, 0.0, TRUE, 0.0, 1.0);
-				close (ARCHIVO);
 		});
+				close (ARCHIVO);
 
 
 	$self->{ejecutar}->set_sensitive(1);
