@@ -31,3 +31,4 @@ requires 'Exporter';
 requires 'File::Temp';
 requires 'Switch';
 requires 'IO::File';
+requires 'File::MimeInfo;';
