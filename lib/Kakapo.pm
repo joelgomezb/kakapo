@@ -69,9 +69,19 @@ sub begin {
 	$self->{ejecutar}->set_sensitive(0);
 	$self->{convertir}->set_sensitive(0);
 
+	my @installed = `dpkg -l festival | grep i | awk \'{print \$2}'`;
+	unless (map (/Festival/i, @installed)) {
+		my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
+                                      'destroy-with-parent',
+                                      'error',
+                                      'ok',
+                                      "El Paquete 'Festival' no esta instalado en el sistema");
+		my $resp = $dialog->run;
+		exit 0 if ( $resp eq "ok" );
+	}
+
 # tengo que verificar que el proceso de festival  esté corriendo
-	system("killall festival");
-	my @process = `ps -eaf | grep festival | awk \'{print \$2}\'`;
+	my @process = `ps -eaf | grep "festival --server" | awk \'{print \$2}\'`;
 	system " (festival --server)  &" if ( @process <= 1 );
 
 	my $engine = 'Festival';
