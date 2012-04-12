@@ -55,12 +55,12 @@ sub convert {
 	$self->{ejecutar}->set_sensitive(0);
 	$self->{convertir}->set_sensitive(0);
 
-	load_file( $self, $file ) unless ( -e "/tmp/kakapo.tmp" );
+	load_file( $self, $file ) unless ( -e $self->{tmp} );
 	my $voice = "voice_".$self->{voices}->get_active_text;
-	my $cmd = "text2wave /tmp/kakapo.tmp -o /home/jgomez/Escritorio/prop.wav -eval '($voice)'";
+	my $cmd = "text2wave $self->{tmp} -o /home/jgomez/Escritorio/prop.wav -eval '($voice)'";
 	system($cmd);
 	
-	unlink("/tmp/kakapo.tmp");
+	unlink( $self->{tmp} );
 	my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
                                       'destroy-with-parent',
                                       'info',
