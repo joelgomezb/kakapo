@@ -56,7 +56,7 @@ sub new {
 
 sub run {
   my ( $self ) = @_;
-#  $self->{vta_login}->show;
+
   $self->begin;
   $self->{ventana_principal}->show;
   $self->{ventana_principal}->signal_connect('delete_event' => sub { Gtk2->main_quit; });
@@ -65,6 +65,11 @@ sub run {
 
 sub begin {
 	my ( $self ) = @_;
+
+	my $conf = new Config::General( File::Spec->rel2abs(File::Spec->curdir()) . "/kakapo.conf");
+	my %config = $conf->getall;
+
+	$self->{tmp} = $config{general}->{tmp};
 
 	$self->{ejecutar}->set_sensitive(0);
 	$self->{convertir}->set_sensitive(0);
