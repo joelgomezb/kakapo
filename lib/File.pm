@@ -3,7 +3,8 @@ package File;
 use strict;
 use warnings;
 use Speech::Synthesis;
-use File::Slurp qw( :edit);
+use File::Slurp;
+use File::Slurp qw( :edit );
 use Encode;
 use IO::File;
 use Exporter;
@@ -83,7 +84,7 @@ sub txt {
 			open(LISTA, $file) || die("tu madre");
 			while(<LISTA>){
 				$buffer_file->insert_at_cursor( decode("utf8", $_) );
-				write_file( $self->{tmp}, { binmode => ':utf8' , append => 1 }, decode ("utf8", $_ ) );
+				write_file( "/tmp/kakapo.tmp", { binmode => ':utf8' , append => 1 }, decode ("utf8", $_ ) );
 			}
 			close(LISTA);	
 
