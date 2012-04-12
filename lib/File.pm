@@ -3,7 +3,7 @@ package File;
 use strict;
 use warnings;
 use Speech::Synthesis;
-use File::Slurp;
+use File::Slurp qw( :edit);
 use Encode;
 use IO::File;
 use Exporter;
@@ -12,7 +12,6 @@ use Data::Dumper;
 use Glib qw{ TRUE FALSE };
 use Gtk2 '-init';
 use File::MimeInfo;
-
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(load_file);
@@ -54,12 +53,16 @@ if you don't export anything, such as for a purely object-oriented module.
 sub load_file {
 	my ( $self, $file ) = @_;
 
-	my $fh = IO::File->new("/tmp/kakapo.tmp", "w");
+	my $fh = IO::File->new( $self->{tmp} , "w");
 
 	my $mime_type = mimetype( $file );
 	print Dumper($mime_type);
+
+	print Dumper("Fino") if -T $file;
+
 	switch ( $mime_type ) {
 		case  /^text/ { txt ( $self, $file ); }
+		case  "application/pdf" { pdf ( $self, $file ); }
 		else {		
 				my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
                                       'destroy-with-parent',
@@ -68,7 +71,7 @@ sub load_file {
                                       "Tipo de Archivo no Soportado");
 				my $resp = $dialog->run;
 				$dialog->destroy if ( $resp eq "ok" );
-				return 0;
+				return 1;
 			}
 	 }
 }
@@ -80,24 +83,45 @@ sub txt {
 			open(LISTA, $file) || die("tu madre");
 			while(<LISTA>){
 				$buffer_file->insert_at_cursor( decode("utf8", $_) );
-				write_file( "/tmp/kakapo.tmp", { binmode => ':utf8' , append => 1 }, decode ("utf8", $_ ) );
+				write_file( $self->{tmp}, { binmode => ':utf8' , append => 1 }, decode ("utf8", $_ ) );
 			}
 			close(LISTA);	
 
 		Glib::Timeout->add(1000, sub {
-				open ARCHIVO, "</tmp/kakapo.tmp";
+				open ARCHIVO, "<$self->{tmp}";
 				my @archivo = <ARCHIVO>;
 				$buffer_file->set_text(decode ( "utf8", "@archivo" ) );
 				$self->{text}->set_buffer($buffer_file);
 				my $end_mark = $buffer_file->create_mark('end', $buffer_file->get_end_iter, FALSE);
 				$self->{text}->scroll_to_mark ($end_mark, 0.0, TRUE, 0.0, 1.0);
 		});
-				close (ARCHIVO);
-
+		close (ARCHIVO);
 
 	$self->{ejecutar}->set_sensitive(1);
 	$self->{convertir}->set_sensitive(1);
 }
+
+sub pdf {
+	my ( $self, $file ) = @_;
+
+	my $buffer_file = Gtk2::TextBuffer->new;
+
+	Glib::Timeout->add(1000, sub {
+			`pdftotext -layout -eol unix '$file' $self->{tmp}`;
+			edit_file { s///gi } $self->{tmp} ;
+			open ARCHIVO, "<$self->{tmp}";
+			my @archivo = <ARCHIVO>;
+			$buffer_file->set_text(decode ( "utf8", "@archivo" ) );
+			$self->{text}->set_buffer($buffer_file);
+			my $end_mark = $buffer_file->create_mark('end', $buffer_file->get_end_iter, FALSE);
+			$self->{text}->scroll_to_mark ($end_mark, 0.0, TRUE, 0.0, 1.0);
+	});
+	close (ARCHIVO);
+
+	$self->{ejecutar}->set_sensitive(1);
+	$self->{convertir}->set_sensitive(1);
+}
+
 
 =head1 AUTHOR
 
