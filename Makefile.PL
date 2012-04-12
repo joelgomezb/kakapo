@@ -32,5 +32,6 @@ requires 'File::Temp';
 requires 'Switch';
 requires 'IO::File';
 requires 'File::MimeInfo';
+requires 'OpenOffice::OODoc';
 
 #Install Depends poppler-utils
