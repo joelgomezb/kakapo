@@ -59,7 +59,8 @@ sub run {
 
   $self->begin;
   $self->{ventana_principal}->show;
-  $self->{ventana_principal}->signal_connect('delete_event' => sub { Gtk2->main_quit; });
+  $self->{ventana_principal}->signal_connect('delete_event' => sub { unlink( $self->{tmp} ) if ( -e $self->{tmp} ); Gtk2->main_quit; });
+	
   Gtk2->main;
 }
 
@@ -133,7 +134,10 @@ sub on_bt_aceptar_clicked {
 }
 
 sub gtk_main_quit {
-  Gtk2->main_quit;
+	my ( $self ) = @_;
+
+	unlink( $self->{tmp} ) if ( -e $self->{tmp} );
+	Gtk2->main_quit;
 }
 
 sub on_bcerrar_clicked {
