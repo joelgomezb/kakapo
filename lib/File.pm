@@ -12,8 +12,8 @@ use Switch;
 use Data::Dumper;
 use Glib qw{ TRUE FALSE };
 use Gtk2 '-init';
-use File::MimeInfo;
 use OpenOffice::OODoc;
+use Text::Extract::Word qw(get_all_text);
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(load_file);
@@ -57,15 +57,17 @@ sub load_file {
 
 	my $fh = IO::File->new( $self->{tmp} , "w");
 
-	my $mime_type = mimetype( $file );
+	my $mime_type = `file --mime-type "$file" | cut -d: -f2 | awk '{print \$1}'`;
+	chomp($mime_type);
 	print Dumper($mime_type);
 
-	print Dumper("Fino") if -T $file;
+	print Dumper("Fino") if ( $file eq " text/plain" );
 
 	switch ( $mime_type ) {
-		case  /^text/ { txt ( $self, $file ); }
+		case  "text/plain" { txt ( $self, $file ); }
 		case  "application/pdf" { pdf ( $self, $file ); }
 		case  "application/vnd.oasis.opendocument.text" { odt ( $self, $file ); }
+		case  { "application/msword" || "application/vnd.ms-office" } { doc ( $self, $file ); }
 		else {		
 				my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
                                       'destroy-with-parent',
@@ -131,7 +133,7 @@ sub odt {
 	my $buffer_file = Gtk2::TextBuffer->new;
 
 			ooLocalEncoding 'utf8';
-			my $doc = ooDocument(file => '$file');
+			my $doc = ooDocument(file => $file);
 			my $result = $doc->getTextContent;
 			write_file( $self->{tmp}, { binmode => ':utf8' , append => 1 }, decode ("utf8", $result ) );
 
@@ -150,6 +152,28 @@ sub odt {
 	$self->{convertir}->set_sensitive(1);
 }
 
+sub doc {
+	my ( $self, $file ) = @_;
+
+	my $buffer_file = Gtk2::TextBuffer->new;
+
+ 	my $text = get_all_text( $file );
+	write_file( $self->{tmp}, { binmode => ':utf8' , append => 1 }, decode ("utf8", $text ) );
+
+	Glib::Timeout->add(1000, sub {
+
+			open ARCHIVO, "<$self->{tmp}";
+			my @archivo = <ARCHIVO>;
+			$buffer_file->set_text(decode ( "utf8", "@archivo" ) );
+			$self->{text}->set_buffer($buffer_file);
+			my $end_mark = $buffer_file->create_mark('end', $buffer_file->get_end_iter, FALSE);
+			$self->{text}->scroll_to_mark ($end_mark, 0.0, TRUE, 0.0, 1.0);
+	});
+	close (ARCHIVO);
+
+	$self->{ejecutar}->set_sensitive(1);
+	$self->{convertir}->set_sensitive(1);
+}
 
 
 =head1 AUTHOR
