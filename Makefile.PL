@@ -33,5 +33,6 @@ requires 'Switch';
 requires 'IO::File';
 requires 'File::MimeInfo';
 requires 'OpenOffice::OODoc';
+requires 'Text::Extract::Word';
 
 #Install Depends poppler-utils
