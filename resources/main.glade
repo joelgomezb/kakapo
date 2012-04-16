@@ -1,17 +1,119 @@
 <?xml version="1.0"?>
 <glade-interface>
   <!-- interface-requires gtk+ 2.16 -->
-  <!-- interface-naming-policy toplevel-contextual -->
-  <widget class="GtkWindow" id="ventana_principal">
+  <!-- interface-naming-policy project-wide -->
+  <widget class="GtkWindow" id="window">
+    <property name="width_request">650</property>
+    <property name="height_request">700</property>
     <property name="visible">True</property>
     <property name="title" translatable="yes">Kakapo</property>
-    <property name="resizable">False</property>
     <property name="window_position">center</property>
+    <property name="default_width">400</property>
+    <property name="default_height">600</property>
     <child>
-      <widget class="GtkVBox" id="vbox1">
+      <widget class="GtkFixed" id="fixed1">
         <property name="visible">True</property>
         <child>
+          <widget class="GtkToolbar" id="toolbar">
+            <property name="width_request">697</property>
+            <property name="height_request">41</property>
+            <property name="visible">True</property>
+            <property name="icon_size">4</property>
+            <child>
+              <widget class="GtkToolButton" id="new">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Nuevo</property>
+                <property name="visible_vertical">False</property>
+                <property name="label" translatable="yes">new</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-new</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="open">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Abrir</property>
+                <property name="label" translatable="yes">Open</property>
+                <property name="stock_id">gtk-open</property>
+                <signal name="clicked" handler="on_open_clicked"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="save">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Guardar</property>
+                <property name="visible_vertical">False</property>
+                <property name="label" translatable="yes">save</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-save</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkSeparatorToolItem" id="sep">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="apply">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Aplicar</property>
+                <property name="visible_vertical">False</property>
+                <property name="label" translatable="yes">apply</property>
+                <property name="stock_id">gtk-apply</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="play">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Reproducir</property>
+                <property name="visible_vertical">False</property>
+                <property name="label" translatable="yes">play</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-media-play</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkSeparatorToolItem" id="sep2">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="y">29</property>
+          </packing>
+        </child>
+        <child>
           <widget class="GtkMenuBar" id="menubar1">
+            <property name="width_request">698</property>
+            <property name="height_request">30</property>
             <property name="visible">True</property>
             <child>
               <widget class="GtkMenuItem" id="menuitem1">
@@ -35,7 +137,6 @@
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_imagemenuitem2_activate" after="yes"/>
                       </widget>
                     </child>
                     <child>
@@ -97,7 +198,15 @@
                     </child>
                     <child>
                       <widget class="GtkImageMenuItem" id="imagemenuitem8">
-                        <property name="label">gtk-preferences</property>
+                        <property name="label">gtk-paste</property>
+                        <property name="visible">True</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkImageMenuItem" id="imagemenuitem9">
+                        <property name="label">gtk-delete</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
@@ -105,6 +214,13 @@
                     </child>
                   </widget>
                 </child>
+              </widget>
+            </child>
+            <child>
+              <widget class="GtkMenuItem" id="menuitem3">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">_Ver</property>
+                <property name="use_underline">True</property>
               </widget>
             </child>
             <child>
@@ -128,213 +244,52 @@
               </widget>
             </child>
           </widget>
-          <packing>
-            <property name="expand">False</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
-          <widget class="GtkFixed" id="fixed1">
+          <widget class="GtkStatusbar" id="statusbar">
+            <property name="width_request">700</property>
+            <property name="height_request">20</property>
             <property name="visible">True</property>
-            <child>
-              <widget class="GtkButton" id="bcerrar">
-                <property name="label">gtk-close</property>
-                <property name="width_request">100</property>
-                <property name="height_request">40</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_bcerrar_clicked"/>
-              </widget>
-              <packing>
-                <property name="x">848</property>
-                <property name="y">567</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkFileChooserButton" id="filechooserbutton1">
-                <property name="width_request">110</property>
-                <property name="height_request">40</property>
-                <property name="visible">True</property>
-                <signal name="file_set" handler="on_filechooserbutton1_file_set"/>
-                <signal name="file_activated" handler="on_filechooserbutton1_file_activated"/>
-              </widget>
-              <packing>
-                <property name="x">29</property>
-                <property name="y">567</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="ejecutar">
-                <property name="label">gtk-execute</property>
-                <property name="width_request">137</property>
-                <property name="height_request">37</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="focus_on_click">False</property>
-                <property name="image_position">right</property>
-                <signal name="clicked" handler="on_hablar_clicked"/>
-              </widget>
-              <packing>
-                <property name="x">510</property>
-                <property name="y">567</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkComboBox" id="voices">
-                <property name="width_request">123</property>
-                <property name="height_request">37</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
-                <property name="receives_default">True</property>
-                <property name="has_tooltip">True</property>
-                <property name="tearoff_title">aa</property>
-                <property name="items" translatable="yes"></property>
-              </widget>
-              <packing>
-                <property name="x">172</property>
-                <property name="y">567</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="convertir">
-                <property name="label">gtk-convert</property>
-                <property name="width_request">135</property>
-                <property name="height_request">36</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="focus_on_click">False</property>
-              </widget>
-              <packing>
-                <property name="x">670</property>
-                <property name="y">567</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkScrolledWindow" id="scroll">
-                <property name="width_request">941</property>
-                <property name="height_request">500</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="shadow_type">in</property>
-                <child>
-                  <widget class="GtkTextView" id="text">
-                    <property name="width_request">466</property>
-                    <property name="height_request">214</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="editable">False</property>
-                  </widget>
-                </child>
-              </widget>
-              <packing>
-                <property name="x">12</property>
-                <property name="y">23</property>
-              </packing>
-            </child>
+            <property name="spacing">2</property>
           </widget>
           <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkFileChooserDialog" id="filechooserdialog1">
-    <property name="border_width">5</property>
-    <property name="type_hint">normal</property>
-    <property name="has_separator">False</property>
-    <child internal-child="vbox">
-      <widget class="GtkVBox" id="dialog-vbox1">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child internal-child="action_area">
-          <widget class="GtkHButtonBox" id="dialog-action_area1">
-            <property name="visible">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <widget class="GtkButton" id="Aceptar">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="Cancelar">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </widget>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkWindow" id="vta_converted">
-    <property name="title" translatable="yes">Kakapo</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="window_position">center</property>
-    <child>
-      <widget class="GtkFixed" id="fixed1">
-        <property name="visible">True</property>
-        <child>
-          <widget class="GtkLabel" id="label1">
-            <property name="width_request">156</property>
-            <property name="height_request">43</property>
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">Conversi&#xF3;n Finalizada</property>
-          </widget>
-          <packing>
-            <property name="x">25</property>
-            <property name="y">5</property>
+            <property name="y">680</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkButton" id="bt_aceptar">
-            <property name="label">gtk-ok</property>
-            <property name="width_request">100</property>
-            <property name="height_request">39</property>
+          <widget class="GtkScrolledWindow" id="scroll">
+            <property name="width_request">650</property>
+            <property name="height_request">610</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
-            <signal name="clicked" handler="on_bt_aceptar_clicked"/>
+            <property name="hscrollbar_policy">automatic</property>
+            <property name="vscrollbar_policy">automatic</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <widget class="GtkTextView" id="text">
+                <property name="width_request">600</property>
+                <property name="height_request">600</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="editable">False</property>
+              </widget>
+            </child>
           </widget>
           <packing>
-            <property name="x">48</property>
-            <property name="y">45</property>
+            <property name="y">71</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkComboBox" id="voices">
+            <property name="width_request">157</property>
+            <property name="height_request">31</property>
+            <property name="visible">True</property>
+            <property name="tooltip" translatable="yes">Voces</property>
+            <property name="items" translatable="yes"></property>
+          </widget>
+          <packing>
+            <property name="x">210</property>
+            <property name="y">34</property>
           </packing>
         </child>
       </widget>
