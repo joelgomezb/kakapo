@@ -102,8 +102,11 @@ sub txt {
 		});
 		close (ARCHIVO);
 
-	$self->{ejecutar}->set_sensitive(1);
-	$self->{convertir}->set_sensitive(1);
+	$self->{apply}->set_sensitive(1);
+	$self->{play}->set_sensitive(1);
+
+	$self->{statusbar}->push($self->{context_id}, "Archivo Cargado: $file");
+
 }
 
 sub pdf {
