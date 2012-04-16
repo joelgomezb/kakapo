@@ -66,10 +66,10 @@ sub convert {
                                       'info',
                                       'ok',
                                       "Conversion Finalizada");
-				my $resp = $dialog->run;
-				$dialog->destroy if ( $resp eq "ok" );
-	$self->{ejecutar}->set_sensitive(1);
-	$self->{convertir}->set_sensitive(1);
+	my $resp = $dialog->run;
+	$dialog->destroy if ( $resp eq "ok" );
+	$self->{apply}->set_sensitive(1);
+	$self->{play}->set_sensitive(1);
 
 }
 
