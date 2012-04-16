@@ -58,8 +58,8 @@ sub run {
   my ( $self ) = @_;
 
   $self->begin;
-  $self->{ventana_principal}->show;
-  $self->{ventana_principal}->signal_connect('delete_event' => sub { unlink( $self->{tmp} ) if ( -e $self->{tmp} ); Gtk2->main_quit; });
+  $self->{window}->show;
+  $self->{window}->signal_connect('delete_event' => sub { unlink( $self->{tmp} ) if ( -e $self->{tmp} ); Gtk2->main_quit; });
 	
   Gtk2->main;
 }
@@ -71,9 +71,10 @@ sub begin {
 	my %config = $conf->getall;
 
 	$self->{tmp} = $config{general}->{tmp};
+	$self->{context_id} = $self->{statusbar}->get_context_id("Statusbar");
 
-	$self->{ejecutar}->set_sensitive(0);
-	$self->{convertir}->set_sensitive(0);
+	$self->{apply}->set_sensitive(0);
+	$self->{play}->set_sensitive(0);
 
 	my @installed = `dpkg -l festival | grep i | awk \'{print \$2}'`;
 	unless (map (/Festival/i, @installed)) {
@@ -93,13 +94,22 @@ sub begin {
 	my $engine = 'Festival';
 	my @voices = Speech::Synthesis->InstalledVoices(engine => $engine);
 
-	$self->{voices}->new_text();
+	unless ( $voices[0]->{name} ) {
+	   	my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
+                                      'destroy-with-parent',
+                                      'error',
+                                      'ok',
+                                      "No tiene ninguna Voz de Festival instalada");
+		my $resp = $dialog->run;
+		exit 0 if ( $resp eq "ok" );
+	}
+
+	$self->{voices}->new_text;
 	foreach (@voices) {
 		$self->{voices}->append_text($_->{name});
 	}
 
 	$self->{voices}->set_active(0);
-
 
 }
 
@@ -112,12 +122,25 @@ sub on_hablar_clicked {
 }
 
 use Data::Dumper;
-sub on_filechooserbutton1_file_set {
+
+sub on_open_clicked {
 	my $self = shift;
 
-	my $buffer_file = Gtk2::TextBuffer->new;
-	my $file = $self->{filechooserbutton1}->get_filename;
-	load_file( $self, $file );
+	my $dialog = Gtk2::FileChooserDialog->new ( 'Abrir archivo', 
+											  $self->{window},
+ 		                                      'open', 
+								 			  'gtk-ok' => 'ok',
+											  'gtk-cancel' => 'cancel');
+
+	if( $dialog->run eq 'ok' ) {
+		my $file = $dialog->get_filename;
+		load_file( $self, $file );
+		print Dumper($self->{context_id});
+	    $self->{statusbar}->push($self->{context_id}, "Cargando...");	
+    	print "Agarre $file \n";
+	 }
+
+	$dialog->destroy;
 }
 
 sub on_imagemenuitem2_activate {
@@ -134,8 +157,8 @@ sub on_bt_aceptar_clicked {
 }
 
 sub gtk_main_quit {
-	my ( $self ) = @_;
-
+	my ( $self ) = shift;
+	
 	unlink( $self->{tmp} ) if ( -e $self->{tmp} );
 	Gtk2->main_quit;
 }
