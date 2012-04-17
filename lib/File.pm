@@ -60,9 +60,7 @@ sub load_file {
 
 	my $mime_type = `file --mime-type "$file" | cut -d: -f2 | awk '{print \$1}'`;
 	chomp($mime_type);
-	print Dumper($mime_type);
-
-	print Dumper("Fino") if ( $file eq " text/plain" );
+	$self->{log}->debug($mime_type);
 
 	switch ( $mime_type ) {
 		case  "text/plain" { txt ( $self, $file ); }
@@ -107,7 +105,6 @@ sub txt {
 
 	$self->{apply}->set_sensitive(1);
 	$self->{play}->set_sensitive(1);
-	$self->{save}->set_sensitive(1);
 
 	$self->{message_id} = $self->{statusbar}->push($self->{context_id}, "Cargando...");	
 
