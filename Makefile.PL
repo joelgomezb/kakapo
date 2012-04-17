@@ -35,5 +35,7 @@ requires 'File::MimeInfo';
 requires 'OpenOffice::OODoc';
 requires 'Text::Extract::Word';
 requires 'Locale::gettext';
+requires 'IO::Socket';
+requires 'Log::Log4perl';
 
-#Install Depends poppler-utils
+#Install Depends poppler-utils festival ffmpeg lame festvox-kallpc16k
