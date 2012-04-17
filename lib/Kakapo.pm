@@ -8,12 +8,13 @@ use Gtk2::GladeXML;
 use Speech::Synthesis;
 use Config::General;
 use File::Slurp;
-use base qw( Gtk2::GladeXML::Simple );
 use Encode;
 use TTS;
-use File qw(load_file);
+use Log::Log4perl;
 use Data::Dumper;
-use Common qw( error_msg );
+use base qw( Gtk2::GladeXML::Simple );
+use Common qw( error_msg question_msg connect_festival );
+use File qw(load_file);
 
 =head1 NAME
 
@@ -26,7 +27,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -51,181 +51,208 @@ if you don't export anything, such as for a purely object-oriented module.
 =cut
 
 sub new {
-  my $class = shift;
-  my $self = $class->SUPER::new( File::Spec->rel2abs(File::Spec->curdir()) . '/resources/main.glade' );
-  return $self;
+    my $class = shift;
+    my $self  = $class->SUPER::new(
+        File::Spec->rel2abs( File::Spec->curdir() ) . '/resources/main.glade' );
+    return $self;
 }
 
 sub run {
-  my ( $self ) = @_;
+    my ($self) = @_;
 
-  $self->begin;
-  $self->{window}->show;
-  $self->{window}->signal_connect('delete_event' => sub { unlink( $self->{tmp} ) if ( -e $self->{tmp} ); Gtk2->main_quit; });
-	
-  Gtk2->main;
+    $self->begin;
+    $self->{window}->show;
+    $self->{window}->signal_connect(
+        'delete_event' => sub { unlink( $self->{tmp} ) if ( -e $self->{tmp} ); Gtk2->main_quit; }
+    );
+
+    Gtk2->main;
 }
 
 sub begin {
-	my ( $self ) = @_;
+    my ($self) = @_;
 
-	my $conf = new Config::General( File::Spec->rel2abs(File::Spec->curdir()) . "/kakapo.conf");
-	my %config = $conf->getall;
+    my $conf = new Config::General( File::Spec->rel2abs( File::Spec->curdir() ) . "/kakapo.conf" );
+    my %config = $conf->getall;
 
-	$self->{tmp} = $config{general}->{tmp};
-	$self->{context_id} = $self->{statusbar}->get_context_id("Statusbar");
+    $self->{tmp}        = $config{general}->{tmp};
+    $self->{log}        = $config{general}->{log};
+    $self->{host}       = $config{festival}->{host};
+    $self->{port}       = $config{festival}->{port};
+    $self->{cmd}        = $config{festival}->{cmd};
+    $self->{context_id} = $self->{statusbar}->get_context_id("Statusbar");
 
-	$self->{apply}->set_sensitive(0);
-	$self->{play}->set_sensitive(0);
-	$self->{save}->set_sensitive(0);
+    Log::Log4perl::init_and_watch(
+        File::Spec->rel2abs( File::Spec->curdir() ) . "/resources/log4perl.conf" );
+    my $logger = Log::Log4perl->get_logger('log');
 
-	my @installed = `dpkg -l festival | grep i | awk \'{print \$2}'`;
-	unless (map (/Festival/i, @installed)) {
+    $self->{log} = $logger;
 
-		my $dialog =  $self->error_msg("El Paquete 'Festival' no esta instalado en el sistema");
-		exit 0;
-	}
+    $self->{apply}->set_sensitive(0);
+    $self->{play}->set_sensitive(0);
 
-# tengo que verificar que el proceso de festival  esté corriendo
-	my @process = `ps -eaf | grep "festival --server" | awk \'{print \$2}\'`;
-	system " (festival --server)  &" if ( @process <= 1 );
+   #    my @installed = `dpkg -l festival | grep i | awk \'{print \$2}'`;
+   #    unless ( map ( /Festival/i, @installed ) ) {
+   #        my $dialog = $self->error_msg("El Paquete 'Festival' no esta instalado en el sistema");
+   #        exit 0;
+   #    }
 
-	my $engine = 'Festival';
-	my @voices = Speech::Synthesis->InstalledVoices(engine => $engine);
+    # tengo que verificar que el proceso de festival  esté corriendo
+    #    my @process = `ps -eaf | grep "festival --server" | awk \'{print \$2}\'`;
+    #    system " (festival --server)  &" if ( @process <= 1 );
 
-	unless ( $voices[0]->{name} ) {
-	   	my $dialog = $self->error_msg("No tiene ninguna Voz de Festival instalada");
-		exit 0;
-	}
+    $self->error_msg("No se pudo iniciar el proceso 'Festival'")
+        unless ( connect_festival($self) );
 
-	$self->{voices}->new_text;
-	foreach (@voices) {
-		$self->{voices}->append_text($_->{name});
-	}
+    my $engine = 'Festival';
+    my @voices = Speech::Synthesis->InstalledVoices( engine => $engine );
 
-	$self->{voices}->set_active(0);
+    unless ( $voices[0]->{name} ) {
+        my $dialog = $self->error_msg("No tiene ninguna Voz de Festival instalada");
+        exit 0;
+    }
+
+    $self->{voices}->new_text;
+    foreach (@voices) {
+        $self->{voices}->append_text( $_->{name} );
+    }
+
+    $self->{voices}->set_active(0);
 
 }
 
 sub on_hablar_clicked {
-	my ( $self ) = @_;
-	
-		my $buffer_file = Gtk2::TextBuffer->new;
-		my $file = $self->{filechooserbutton1}->get_filename;
-		convert( $self, $file );
+    my ($self) = @_;
+
+    my $buffer_file = Gtk2::TextBuffer->new;
+    my $file        = $self->{filechooserbutton1}->get_filename;
+    convert( $self, $file );
 }
 
-
 sub on_open_clicked {
-	my $self = shift;
+    my $self = shift;
 
-	my $dialog = Gtk2::FileChooserDialog->new ( 'Abrir archivo', 
-											  $self->{window},
- 		                                      'open', 
-								 			  'gtk-ok' => 'ok',
-											  'gtk-cancel' => 'cancel');
+    my $dialog = Gtk2::FileChooserDialog->new(
+        'Abrir archivo...',
+        $self->{window},
+        'open',
+        'gtk-ok'     => 'ok',
+        'gtk-cancel' => 'cancel'
+    );
 
-	my $filter = Gtk2::FileFilter->new;
-	$filter->set_name("Archivos de Texto");
+    my $filter = Gtk2::FileFilter->new;
+    $filter->set_name("Archivos de Texto");
     $filter->add_mime_type("text/*");
-	
-	my $filter2 = Gtk2::FileFilter->new;
-	$filter2->set_name("Archivos pdf");
+
+    my $filter2 = Gtk2::FileFilter->new;
+    $filter2->set_name("Archivos pdf");
     $filter2->add_mime_type("application/pdf");
 
-	my $filter3 = Gtk2::FileFilter->new;
-	$filter3->set_name("Archivos odt");
+    my $filter3 = Gtk2::FileFilter->new;
+    $filter3->set_name("Archivos odt");
     $filter3->add_mime_type("application/vnd.oasis.opendocument.text");
 
-	my $filter4 = Gtk2::FileFilter->new;
-	$filter4->set_name("Archivos doc");
+    my $filter4 = Gtk2::FileFilter->new;
+    $filter4->set_name("Archivos doc");
     $filter4->add_mime_type("application/msword");
     $filter4->add_mime_type("application/vnd.ms-office");
 
-	my $filter5 = Gtk2::FileFilter->new;
-	$filter5->set_name("Archivos docx");
+    my $filter5 = Gtk2::FileFilter->new;
+    $filter5->set_name("Archivos docx");
     $filter5->add_mime_type("application/vnd.ms-office");
 
-	$dialog->add_filter($filter);
-	$dialog->add_filter($filter2);
-	$dialog->add_filter($filter3);
-	$dialog->add_filter($filter4);
-	$dialog->add_filter($filter5);
+    $dialog->add_filter($filter);
+    $dialog->add_filter($filter2);
+    $dialog->add_filter($filter3);
+    $dialog->add_filter($filter4);
+    $dialog->add_filter($filter5);
 
-	if( $dialog->run eq 'ok' ) {
-		my $file = $dialog->get_filename;
-		load_file( $self, $file );
-		print Dumper($self->{context_id});
-    	print "Agarre $file \n";
-	 }
+    if ( $dialog->run eq 'ok' ) {
+        my $file = $dialog->get_filename;
+        load_file( $self, $file );
+        $self->{log}->debug("File: $file");
+    }
 
-	$dialog->destroy;
+    $dialog->destroy;
 }
 
-sub on_save_clicked {
-	my $self = shift;
+sub on_openitem_activate {
+    my $self = shift;
 
-	my $dialog = Gtk2::FileChooserDialog->new ( 'Guardar archivo', 
-											  $self->{window},
- 		                                      'save', 
-								 			  'gtk-ok' => 'ok',
-											  'gtk-cancel' => 'cancel');
+    $self->on_open_clicked;
+}
 
-	my $filter = Gtk2::FileFilter->new;
-	$filter->set_name("Archivos Ogg");
+sub on_apply_clicked {
+    my $self = shift;
+
+    my $dialog = Gtk2::FileChooserDialog->new(
+        'Guardar archivo...',
+        $self->{window},
+        'save',
+        'gtk-ok'     => 'ok',
+        'gtk-cancel' => 'cancel'
+    );
+    $dialog->set_current_name("kakapo.ogg");
+	$dialog->set_do_overwrite_confirmation(1);
+
+    my $filter = Gtk2::FileFilter->new;
+    $filter->set_name("Archivos Ogg");
     $filter->add_mime_type("audio/ogg");
 
-	my $filter2 = Gtk2::FileFilter->new;
-	$filter2->set_name("Archivos Mp3");
+    my $filter2 = Gtk2::FileFilter->new;
+    $filter2->set_name("Archivos Mp3");
     $filter2->add_mime_type("audio/mp3");
 
-	$dialog->add_filter($filter);
-	$dialog->add_filter($filter2);
-
-	if( $dialog->run eq 'ok' ) {
-		my $file = $dialog->get_filename;
-		#convert( $self, $file );
-		print Dumper($self->{context_id});
-	 }
-
-	$dialog->destroy;
-
+    $dialog->add_filter($filter);
+    $dialog->add_filter($filter2);
+	my $algo = $dialog->get_filter();
+	my $algodon = $algo->get_name();
 	
+	print Dumper($algodon);
+
+    if ( $dialog->run eq 'ok' ) {
+        my $file = $dialog->get_filename;
+        print "joelgomezb: $file\n";
+
+        #convert( $self, $file );
+    }
+
+    $dialog->destroy;
+
 }
 
 sub on_new_clicked {
-	my $self = shift;
+    my $self = shift;
 
-	my $buffer_file = Gtk2::TextBuffer->new;
-	$buffer_file->set_text("");
-	$self->{text}->set_buffer($buffer_file);
+    my $buffer_file = Gtk2::TextBuffer->new;
+    $buffer_file->set_text("");
+    $self->{text}->set_buffer($buffer_file);
 
-	$self->{apply}->set_sensitive(0);
-	$self->{play}->set_sensitive(0);
-	$self->{save}->set_sensitive(0);
-	$self->{statusbar}->push($self->{context_id}, "");
-	unlink( $self->{tmp} ) if ( -e $self->{tmp} );
+    $self->{apply}->set_sensitive(0);
+    $self->{play}->set_sensitive(0);
+    $self->{statusbar}->push( $self->{context_id}, "" );
+    unlink( $self->{tmp} ) if ( -e $self->{tmp} );
+}
+
+sub on_newitem_activate {
+    my $self = shift;
+
+    $self->on_new_clicked;
 }
 
 sub gtk_main_quit {
-	my ( $self ) = shift;
-	
-	unlink( $self->{tmp} ) if ( -e $self->{tmp} );
-	Gtk2->main_quit;
+    my ($self) = shift;
+
+    unlink( $self->{tmp} ) if ( -e $self->{tmp} );
+    system("killall festival");
+    Gtk2->main_quit;
 }
 
 sub on_quit_activate {
-	my $self = shift;
- 
-	my $dialog = Gtk2::MessageDialog->new($self->{window},
-    	                                  'destroy-with-parent',
-        	                              'question',
-            	                          'yes-no',
-                	                      "Esta Seguro que desea Salir?");
-	my $resp = $dialog->run;
-	$self->gtk_main_quit if ( $resp eq "yes" );
-	$dialog->destroy;
-;
+    my $self = shift;
+
+    my $resp = $self->question_msg("Esta seguro que desa salir?");
+    $self->gtk_main_quit if ( $resp eq "yes" );
 }
 
 sub function1 {
@@ -305,4 +332,4 @@ if not, write to the Free Software Foundation, Inc.,
 
 =cut
 
-1; # End of Kakapo
+1;    # End of Kakapo
