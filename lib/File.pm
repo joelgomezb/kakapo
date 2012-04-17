@@ -57,6 +57,7 @@ sub load_file {
 
 	my $fh = IO::File->new( $self->{tmp} , "w");
 
+
 	my $mime_type = `file --mime-type "$file" | cut -d: -f2 | awk '{print \$1}'`;
 	chomp($mime_type);
 	print Dumper($mime_type);
@@ -84,6 +85,7 @@ sub load_file {
 sub txt {
 	my ( $self, $file ) = @_;
 
+
 	my $buffer_file = Gtk2::TextBuffer->new;
 			open(LISTA, $file) || die("tu madre");
 			while(<LISTA>){
@@ -93,6 +95,7 @@ sub txt {
 			close(LISTA);	
 
 		Glib::Timeout->add(1000, sub {
+				$self->{message_id} = $self->{statusbar}->push($self->{context_id}, $file);	
 				open ARCHIVO, "<$self->{tmp}";
 				my @archivo = <ARCHIVO>;
 				$buffer_file->set_text(decode ( "utf8", "@archivo" ) );
@@ -104,8 +107,9 @@ sub txt {
 
 	$self->{apply}->set_sensitive(1);
 	$self->{play}->set_sensitive(1);
+	$self->{save}->set_sensitive(1);
 
-	$self->{statusbar}->push($self->{context_id}, "Archivo Cargado: $file");
+	$self->{message_id} = $self->{statusbar}->push($self->{context_id}, "Cargando...");	
 
 }
 
