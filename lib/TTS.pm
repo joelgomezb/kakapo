@@ -52,8 +52,9 @@ if you don't export anything, such as for a purely object-oriented module.
 sub convert {
 	my ( $self, $file ) = @_;
 
-	$self->{ejecutar}->set_sensitive(0);
-	$self->{convertir}->set_sensitive(0);
+	$self->{apply}->set_sensitive(0);
+	$self->{play}->set_sensitive(0);
+	$self->{save}->set_sensitive(0);
 
 	load_file( $self, $file ) unless ( -e $self->{tmp} );
 	my $voice = "voice_".$self->{voices}->get_active_text;
@@ -70,6 +71,7 @@ sub convert {
 	$dialog->destroy if ( $resp eq "ok" );
 	$self->{apply}->set_sensitive(1);
 	$self->{play}->set_sensitive(1);
+	$self->{save}->set_sensitive(1);
 
 }
 
