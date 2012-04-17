@@ -12,6 +12,8 @@ use base qw( Gtk2::GladeXML::Simple );
 use Encode;
 use TTS;
 use File qw(load_file);
+use Data::Dumper;
+use Common qw( error_msg );
 
 =head1 NAME
 
@@ -75,16 +77,13 @@ sub begin {
 
 	$self->{apply}->set_sensitive(0);
 	$self->{play}->set_sensitive(0);
+	$self->{save}->set_sensitive(0);
 
 	my @installed = `dpkg -l festival | grep i | awk \'{print \$2}'`;
 	unless (map (/Festival/i, @installed)) {
-		my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
-                                      'destroy-with-parent',
-                                      'error',
-                                      'ok',
-                                      "El Paquete 'Festival' no esta instalado en el sistema");
-		my $resp = $dialog->run;
-		exit 0 if ( $resp eq "ok" );
+
+		my $dialog =  $self->error_msg("El Paquete 'Festival' no esta instalado en el sistema");
+		exit 0;
 	}
 
 # tengo que verificar que el proceso de festival  esté corriendo
@@ -95,13 +94,8 @@ sub begin {
 	my @voices = Speech::Synthesis->InstalledVoices(engine => $engine);
 
 	unless ( $voices[0]->{name} ) {
-	   	my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
-                                      'destroy-with-parent',
-                                      'error',
-                                      'ok',
-                                      "No tiene ninguna Voz de Festival instalada");
-		my $resp = $dialog->run;
-		exit 0 if ( $resp eq "ok" );
+	   	my $dialog = $self->error_msg("No tiene ninguna Voz de Festival instalada");
+		exit 0;
 	}
 
 	$self->{voices}->new_text;
@@ -121,7 +115,6 @@ sub on_hablar_clicked {
 		convert( $self, $file );
 }
 
-use Data::Dumper;
 
 sub on_open_clicked {
 	my $self = shift;
@@ -132,28 +125,86 @@ sub on_open_clicked {
 								 			  'gtk-ok' => 'ok',
 											  'gtk-cancel' => 'cancel');
 
+	my $filter = Gtk2::FileFilter->new;
+	$filter->set_name("Archivos de Texto");
+    $filter->add_mime_type("text/*");
+	
+	my $filter2 = Gtk2::FileFilter->new;
+	$filter2->set_name("Archivos pdf");
+    $filter2->add_mime_type("application/pdf");
+
+	my $filter3 = Gtk2::FileFilter->new;
+	$filter3->set_name("Archivos odt");
+    $filter3->add_mime_type("application/vnd.oasis.opendocument.text");
+
+	my $filter4 = Gtk2::FileFilter->new;
+	$filter4->set_name("Archivos doc");
+    $filter4->add_mime_type("application/msword");
+    $filter4->add_mime_type("application/vnd.ms-office");
+
+	my $filter5 = Gtk2::FileFilter->new;
+	$filter5->set_name("Archivos docx");
+    $filter5->add_mime_type("application/vnd.ms-office");
+
+	$dialog->add_filter($filter);
+	$dialog->add_filter($filter2);
+	$dialog->add_filter($filter3);
+	$dialog->add_filter($filter4);
+	$dialog->add_filter($filter5);
+
 	if( $dialog->run eq 'ok' ) {
 		my $file = $dialog->get_filename;
 		load_file( $self, $file );
 		print Dumper($self->{context_id});
-	    $self->{statusbar}->push($self->{context_id}, "Cargando...");	
     	print "Agarre $file \n";
 	 }
 
 	$dialog->destroy;
 }
 
-sub on_imagemenuitem2_activate {
+sub on_save_clicked {
 	my $self = shift;
-	$self->{filechooserdialog1}->show();
-	print Dumper($self->{filechooserbutton1}->get_filename);
-#	$self->on_filechooserbutton1_file_set();
+
+	my $dialog = Gtk2::FileChooserDialog->new ( 'Guardar archivo', 
+											  $self->{window},
+ 		                                      'save', 
+								 			  'gtk-ok' => 'ok',
+											  'gtk-cancel' => 'cancel');
+
+	my $filter = Gtk2::FileFilter->new;
+	$filter->set_name("Archivos Ogg");
+    $filter->add_mime_type("audio/ogg");
+
+	my $filter2 = Gtk2::FileFilter->new;
+	$filter2->set_name("Archivos Mp3");
+    $filter2->add_mime_type("audio/mp3");
+
+	$dialog->add_filter($filter);
+	$dialog->add_filter($filter2);
+
+	if( $dialog->run eq 'ok' ) {
+		my $file = $dialog->get_filename;
+		#convert( $self, $file );
+		print Dumper($self->{context_id});
+	 }
+
+	$dialog->destroy;
+
+	
 }
 
-sub on_bt_aceptar_clicked {
-	my ( $self ) = @_;
+sub on_new_clicked {
+	my $self = shift;
 
-	$self->{vta_converted}->hide;
+	my $buffer_file = Gtk2::TextBuffer->new;
+	$buffer_file->set_text("");
+	$self->{text}->set_buffer($buffer_file);
+
+	$self->{apply}->set_sensitive(0);
+	$self->{play}->set_sensitive(0);
+	$self->{save}->set_sensitive(0);
+	$self->{statusbar}->push($self->{context_id}, "");
+	unlink( $self->{tmp} ) if ( -e $self->{tmp} );
 }
 
 sub gtk_main_quit {
@@ -163,10 +214,18 @@ sub gtk_main_quit {
 	Gtk2->main_quit;
 }
 
-sub on_bcerrar_clicked {
-  my $self = shift;
-
-  $self->gtk_main_quit;
+sub on_quit_activate {
+	my $self = shift;
+ 
+	my $dialog = Gtk2::MessageDialog->new($self->{window},
+    	                                  'destroy-with-parent',
+        	                              'question',
+            	                          'yes-no',
+                	                      "Esta Seguro que desea Salir?");
+	my $resp = $dialog->run;
+	$self->gtk_main_quit if ( $resp eq "yes" );
+	$dialog->destroy;
+;
 }
 
 sub function1 {
