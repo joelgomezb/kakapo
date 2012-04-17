@@ -7,11 +7,13 @@ use Locale::gettext;
 use Encode;
 use Exporter;
 use POSIX;
+use IO::Socket;
+use Config::General;
 
-setlocale(LC_MESSAGES, "");
+setlocale( LC_MESSAGES, "" );
 
-our @ISA = qw(Exporter);
-our @EXPORT = qw( error_msg );
+our @ISA    = qw(Exporter);
+our @EXPORT = qw( error_msg question_msg connect_festival );
 
 =head1 NAME
 
@@ -24,7 +26,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -44,21 +45,72 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
-
+=head2 error_msg
+	rutina para mostrar todos los mensajes errores
 =cut
+
 sub error_msg {
+    my $self = shift;
+    my $msg  = shift;
+
+    my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'error', 'ok',
+        gettext($msg) );
+
+    $dialog->run;
+    $dialog->destroy;
+}
+
+sub question_msg {
 	my $self = shift;
 	my $msg = shift;
 
-	my $dialog = Gtk2::MessageDialog->new($self->{window},
-    	                                  'destroy-with-parent',
-        	                              'error',
-            	                          'ok',
-                	                      gettext( $msg ) );
-
-	$dialog->run;
+	my $dialog
+        = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'question', 'yes-no', gettext( $msg ) );
+    my $resp = $dialog->run;
 	$dialog->destroy;
+	return $resp;
+
+}
+
+=head2 connect_festival
+	rutina para ejecutar el proceso del servidor de festival
+=cut
+
+sub connect_festival {
+    my $self   = shift;
+    my $handle = '';
+    my $tries  = 0;
+
+    while ( $handle eq '' ) {
+        $self->{log}->debug ("($tries) Attempting to connect to the Festival server.");
+
+        if ($handle = IO::Socket::INET->new(
+                Proto    => 'tcp',
+                PeerAddr => $self->{host},
+                PeerPort => $self->{port}
+            )
+            )
+        {
+            $self->{log}->debug("Successfully opened connection to Festival.");
+        }
+        else {
+            if ($tries) {
+                $self->{log}->debug(
+                    "Waiting for Festival server to load -- Can't connect to port $self->{port} on $self->{host} yet ($!).");
+            }
+            else {
+                if ( $self->{host} eq "localhost" ) {
+                    $self->{log}->debug("Failed to connect to Festival server, attempting to load it myself.");
+                    system( $self->{cmd} );
+                }
+            }
+            sleep 1;
+        }
+        $tries++;
+    }
+    $handle->autoflush(1);
+    return $handle;
+
 }
 
 # tengo que hacer el decode los mensajes
@@ -130,4 +182,4 @@ if not, write to the Free Software Foundation, Inc.,
 
 =cut
 
-1; # End of Kakapo
+1;    # End of Kakapo
