@@ -34,5 +34,6 @@ requires 'IO::File';
 requires 'File::MimeInfo';
 requires 'OpenOffice::OODoc';
 requires 'Text::Extract::Word';
+requires 'Locale::gettext';
 
 #Install Depends poppler-utils
