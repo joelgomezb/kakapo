@@ -3,8 +3,7 @@
   <!-- interface-requires gtk+ 2.16 -->
   <!-- interface-naming-policy project-wide -->
   <widget class="GtkWindow" id="window">
-    <property name="width_request">650</property>
-    <property name="height_request">700</property>
+    <property name="height_request">400</property>
     <property name="visible">True</property>
     <property name="title" translatable="yes">Kakapo</property>
     <property name="window_position">center</property>
@@ -17,7 +16,7 @@
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
-          <widget class="GtkMenuBar" id="menubar1">
+          <widget class="GtkMenuBar" id="menubar">
             <property name="visible">True</property>
             <child>
               <widget class="GtkMenuItem" id="menuitem1">
@@ -28,33 +27,44 @@
                   <widget class="GtkMenu" id="menu1">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkImageMenuItem" id="imagemenuitem1">
+                      <widget class="GtkImageMenuItem" id="newitem">
                         <property name="label">gtk-new</property>
                         <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Nuevo</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_newitem_activate"/>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkImageMenuItem" id="imagemenuitem2">
+                      <widget class="GtkImageMenuItem" id="openitem">
                         <property name="label">gtk-open</property>
                         <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Abrir</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_openitem_activate"/>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="menuitem3">
+                        <property name="visible">True</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkImageMenuItem" id="applyitem">
+                        <property name="label">gtk-apply</property>
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Generar Archivo de Audio</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkImageMenuItem" id="imagemenuitem3">
-                        <property name="label">gtk-save</property>
+                      <widget class="GtkImageMenuItem" id="playitem">
+                        <property name="label">gtk-media-play</property>
                         <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </widget>
-                    </child>
-                    <child>
-                      <widget class="GtkImageMenuItem" id="imagemenuitem4">
-                        <property name="label">gtk-save-as</property>
-                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Reproducir Texto</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </widget>
@@ -68,6 +78,7 @@
                       <widget class="GtkImageMenuItem" id="quit">
                         <property name="label">gtk-quit</property>
                         <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Salir</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="on_quit_activate"/>
@@ -122,13 +133,6 @@
               </widget>
             </child>
             <child>
-              <widget class="GtkMenuItem" id="menuitem3">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_Ver</property>
-                <property name="use_underline">True</property>
-              </widget>
-            </child>
-            <child>
               <widget class="GtkMenuItem" id="menuitem4">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Ay_uda</property>
@@ -137,7 +141,7 @@
                   <widget class="GtkMenu" id="menu3">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkImageMenuItem" id="imagemenuitem10">
+                      <widget class="GtkImageMenuItem" id="aboutitem">
                         <property name="label">gtk-about</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
@@ -192,22 +196,6 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkToolButton" id="save">
-                <property name="visible">True</property>
-                <property name="has_tooltip">True</property>
-                <property name="tooltip" translatable="yes">Guardar</property>
-                <property name="visible_vertical">False</property>
-                <property name="label" translatable="yes">save</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-save</property>
-                <signal name="clicked" handler="on_save_clicked"/>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
               <widget class="GtkSeparatorToolItem" id="sep">
                 <property name="visible">True</property>
               </widget>
@@ -224,6 +212,7 @@
                 <property name="visible_vertical">False</property>
                 <property name="label" translatable="yes">apply</property>
                 <property name="stock_id">gtk-apply</property>
+                <signal name="clicked" handler="on_apply_clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -286,8 +275,7 @@
             <property name="shadow_type">in</property>
             <child>
               <widget class="GtkTextView" id="text">
-                <property name="width_request">600</property>
-                <property name="height_request">600</property>
+                <property name="height_request">400</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="editable">False</property>
