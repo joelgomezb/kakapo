@@ -62,7 +62,7 @@ sub convert {
 	system($cmd);
 	
 	unlink( $self->{tmp} );
-	my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
+	my $dialog = Gtk2::MessageDialog->new($self->{window},
                                       'destroy-with-parent',
                                       'info',
                                       'ok',
