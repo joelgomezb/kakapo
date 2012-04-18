@@ -11,8 +11,7 @@ use Switch;
 use Data::Dumper;
 use File qw( load_file );
 
-
-our @ISA = qw(Exporter);
+our @ISA    = qw(Exporter);
 our @EXPORT = qw( convert );
 
 =head1 NAME
@@ -26,7 +25,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -49,30 +47,31 @@ if you don't export anything, such as for a purely object-oriented module.
 =head2 function1
 
 =cut
+
 sub convert {
-	my ( $self, $file ) = @_;
+    my ( $self, $file, $sel_filter ) = @_;
 
-	$self->{apply}->set_sensitive(0);
-	$self->{play}->set_sensitive(0);
+    $self->{apply}->set_sensitive(0);
+    $self->{play}->set_sensitive(0);
 
-	load_file( $self, $file ) unless ( -e $self->{tmp} );
-	my $voice = "voice_".$self->{voices}->get_active_text;
-	my $cmd = "text2wave $self->{tmp} -o /home/jgomez/Escritorio/prop.wav -eval '($voice)'";
-	system($cmd);
-	
-	unlink( $self->{tmp} );
-	my $dialog = Gtk2::MessageDialog->new($self->{window},
-                                      'destroy-with-parent',
-                                      'info',
-                                      'ok',
-                                      "Conversion Finalizada");
-	my $resp = $dialog->run;
-	$dialog->destroy if ( $resp eq "ok" );
-	$self->{apply}->set_sensitive(1);
-	$self->{play}->set_sensitive(1);
+    load_file( $self, $file ) unless ( -e $self->{tmp} );
+    my $voice = "voice_" . $self->{voices}->get_active_text;
+    my $cmd   = "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)'";
+    system($cmd);
+
+    switch ($sel_filter) {
+        case "Archivos Ogg" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
+        case "Archivos Mp3" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
+    }
+
+    my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
+        "Conversion Finalizada" );
+    my $resp = $dialog->run;
+    $dialog->destroy if ( $resp eq "ok" );
+    $self->{apply}->set_sensitive(1);
+    $self->{play}->set_sensitive(1);
 
 }
-
 
 =head1 AUTHOR
 
@@ -141,4 +140,4 @@ if not, write to the Free Software Foundation, Inc.,
 
 =cut
 
-1; # End of Kakapo
+1;    # End of Kakapo
