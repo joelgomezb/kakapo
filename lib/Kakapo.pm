@@ -3,6 +3,7 @@ package Kakapo;
 use strict;
 use warnings;
 use Gtk2 '-init';
+set_locale Gtk2;
 use Gtk2::Ex::Simple::List;
 use Gtk2::GladeXML;
 use Speech::Synthesis;
@@ -65,7 +66,7 @@ sub run {
     $self->{window}->signal_connect(
         'delete_event' => sub { unlink( $self->{tmp} ) if ( -e $self->{tmp} ); Gtk2->main_quit; }
     );
-
+	Gtk2->set_locale;
     Gtk2->main;
 }
 
@@ -76,7 +77,8 @@ sub begin {
     my %config = $conf->getall;
 
     $self->{tmp}        = $config{general}->{tmp};
-    $self->{log}        = $config{general}->{log};
+    $self->{logfile}        = $config{general}->{logfile};
+    $self->{wav}        = $config{general}->{wav};
     $self->{host}       = $config{festival}->{host};
     $self->{port}       = $config{festival}->{port};
     $self->{cmd}        = $config{festival}->{cmd};
@@ -205,16 +207,15 @@ sub on_apply_clicked {
 
     $dialog->add_filter($filter);
     $dialog->add_filter($filter2);
-	my $algo = $dialog->get_filter();
-	my $algodon = $algo->get_name();
-	
-	print Dumper($algodon);
+		
 
     if ( $dialog->run eq 'ok' ) {
         my $file = $dialog->get_filename;
-        print "joelgomezb: $file\n";
-
-        #convert( $self, $file );
+		my $filter = $dialog->get_filter();
+		my $sel_filter = $filter->get_name();
+		$self->{log}->debug($sel_filter);
+		$self->{log}->debug($file);
+        convert( $self, $file, $sel_filter );
     }
 
     $dialog->destroy;
@@ -244,6 +245,8 @@ sub gtk_main_quit {
     my ($self) = shift;
 
     unlink( $self->{tmp} ) if ( -e $self->{tmp} );
+    unlink( $self->{wav} ) if ( -e $self->{wav} );
+
     system("killall festival");
     Gtk2->main_quit;
 }
