@@ -127,8 +127,8 @@ sub pdf {
 	});
 	close (ARCHIVO);
 
-	$self->{ejecutar}->set_sensitive(1);
-	$self->{convertir}->set_sensitive(1);
+	$self->{apply}->set_sensitive(1);
+	$self->{play}->set_sensitive(1);
 }
 
 sub odt {
@@ -152,8 +152,8 @@ sub odt {
 	});
 	close (ARCHIVO);
 
-	$self->{ejecutar}->set_sensitive(1);
-	$self->{convertir}->set_sensitive(1);
+	$self->{apply}->set_sensitive(1);
+	$self->{play}->set_sensitive(1);
 }
 
 sub doc {
@@ -175,8 +175,8 @@ sub doc {
 	});
 	close (ARCHIVO);
 
-	$self->{ejecutar}->set_sensitive(1);
-	$self->{convertir}->set_sensitive(1);
+	$self->{apply}->set_sensitive(1);
+	$self->{play}->set_sensitive(1);
 }
 
 
