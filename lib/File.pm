@@ -70,10 +70,7 @@ sub load_file {
             doc( $self, $file );
         }
         else {
-            my $dialog = Gtk2::MessageDialog->new( $self->{ventana_principal},
-                'destroy-with-parent', 'error', 'ok', "Tipo de Archivo no Soportado" );
-            my $resp = $dialog->run;
-            $dialog->destroy if ( $resp eq "ok" );
+            $self->error_msg("File not supported");
             return 1;
         }
     }
@@ -83,7 +80,7 @@ sub txt {
     my ( $self, $file ) = @_;
 
     my $buffer_file = Gtk2::TextBuffer->new;
-    open( LISTA, $file ) || die("tu madre");
+    open( LISTA, $file ) || die error_msg($?);
     while (<LISTA>) {
         $buffer_file->insert_at_cursor( decode( "utf8", $_ ) );
         write_file( $self->{tmp}, { binmode => ':utf8', append => 1 }, decode( "utf8", $_ ) );
@@ -94,7 +91,7 @@ sub txt {
         1000,
         sub {
             $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
-            open ARCHIVO, "<$self->{tmp}";
+            open ARCHIVO, "<$self->{tmp}" || die error_msg($?);
             my @archivo = <ARCHIVO>;
             $buffer_file->set_text( decode( "utf8", "@archivo" ) );
             $self->{text}->set_buffer($buffer_file);
@@ -122,7 +119,7 @@ sub pdf {
             $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
             `pdftotext -layout -eol unix '$file' $self->{tmp}`;
             edit_file {s///gi} $self->{tmp};
-            open ARCHIVO, "<$self->{tmp}";
+            open ARCHIVO, "<$self->{tmp}" || die error_msg($?);
             my @archivo = <ARCHIVO>;
             $buffer_file->set_text( decode( "utf8", "@archivo" ) );
             $self->{text}->set_buffer($buffer_file);
@@ -149,7 +146,7 @@ sub odt {
         1000,
         sub {
             $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
-            open ARCHIVO, "<$self->{tmp}";
+            open ARCHIVO, "<$self->{tmp}" || die error_msg($?);
             my @archivo = <ARCHIVO>;
             $buffer_file->set_text( decode( "utf8", "@archivo" ) );
             $self->{text}->set_buffer($buffer_file);
@@ -177,7 +174,7 @@ sub doc {
         1000,
         sub {
 
-            open ARCHIVO, "<$self->{tmp}";
+            open ARCHIVO, "<$self->{tmp}" || die error_msg($?);
             my @archivo = <ARCHIVO>;
             $buffer_file->set_text( decode( "utf8", "@archivo" ) );
             $self->{text}->set_buffer($buffer_file);
