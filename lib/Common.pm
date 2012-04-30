@@ -82,7 +82,7 @@ sub connect_festival {
     my $tries  = 0;
 
     while ( $handle eq '' ) {
-        $self->{log}->debug ("($tries) Attempting to connect to the Festival server.");
+        $self->{logdebug}->debug ("($tries) Attempting to connect to the Festival server.");
 
         if ($handle = IO::Socket::INET->new(
                 Proto    => 'tcp',
@@ -91,16 +91,16 @@ sub connect_festival {
             )
             )
         {
-            $self->{log}->debug("Successfully opened connection to Festival.");
+            $self->{logdebug}->debug("Successfully opened connection to Festival.");
         }
         else {
             if ($tries) {
-                $self->{log}->debug(
+                $self->{logdebug}->debug(
                     "Waiting for Festival server to load -- Can't connect to port $self->{port} on $self->{host} yet ($!).");
             }
             else {
                 if ( $self->{host} eq "localhost" ) {
-                    $self->{log}->debug("Failed to connect to Festival server, attempting to load it myself.");
+                    $self->{logdebug}->debug("Failed to connect to Festival server, attempting to load it myself.");
                     system( $self->{cmd} );
                 }
             }
