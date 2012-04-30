@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kakapo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-18 15:43-0400\n"
+"POT-Creation-Date: 2012-04-27 14:32-0400\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Joel Gomez <joelgomezb@gmail.com>\n"
 "Language-Team: Mundo Accesible <joelgomezb@gmail.com>\n"
@@ -20,15 +20,15 @@ msgstr ""
 msgid "\n"
 msgstr ""
 
-#: /home/jgomez/desarrollos/kakapo/lib/Kakapo.pm:106
+#: /home/jgomez/desarrollos/kakapo/lib/Kakapo.pm:107
 msgid "No se pudo iniciar el proceso 'Festival'"
 msgstr "Faild to start the 'Festival'"
 
-#: /home/jgomez/desarrollos/kakapo/lib/Kakapo.pm:113
+#: /home/jgomez/desarrollos/kakapo/lib/Kakapo.pm:114
 msgid "No tiene ninguna Voz de Festival instalada"
 msgstr "No voices installed"
 
-#: /home/jgomez/desarrollos/kakapo/lib/Kakapo.pm:257
+#: /home/jgomez/desarrollos/kakapo/lib/Kakapo.pm:301
 msgid "Esta seguro que desa salir?"
 msgstr "Are you sure you want to quit?"
 
@@ -37,60 +37,82 @@ msgid "Kakapo"
 msgstr "Kakapo"
 
 #: /home/jgomez/desarrollos/kakapo/resources/main.glade:24
-msgid "_Archivo"
-msgstr "File"
+msgid "_File"
+msgstr ""
 
 #: /home/jgomez/desarrollos/kakapo/resources/main.glade:33
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:172
-msgid "Nuevo"
-msgstr "New"
-
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:43
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:188
-msgid "Abrir"
-msgstr "Open"
-
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:58
-msgid "Generar Archivo de Audio"
-msgstr "Generate Audio File"
-
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:67
-msgid "Reproducir Texto"
-msgstr "Play Text"
-
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:81
-msgid "Salir"
-msgstr "Quit"
-
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:94
-msgid "_Editar"
-msgstr "Edit"
-
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:138
-msgid "Ay_uda"
-msgstr "Help"
-
 #: /home/jgomez/desarrollos/kakapo/resources/main.glade:174
-msgid "new"
+#, fuzzy
+msgid "New"
 msgstr "Nuevo"
 
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:189
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:43
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:190
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:191
 msgid "Open"
 msgstr "Abrir"
 
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:211
-msgid "Aplicar"
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:58
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:213
+#, fuzzy
+msgid "Apply"
 msgstr "Apply"
 
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:213
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:67
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:228
+#, fuzzy
+msgid "Play"
+msgstr "Play"
+
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:81
+msgid "Quit"
+msgstr ""
+
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:94
+#, fuzzy
+msgid "_Edit"
+msgstr "Edit"
+
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:127
+msgid "Preferences"
+msgstr ""
+
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:138
+msgid "_Help"
+msgstr ""
+
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:147
+msgid "About"
+msgstr ""
+
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:176
+msgid "new"
+msgstr "Nuevo"
+
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:215
 msgid "apply"
 msgstr "Apply"
 
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:226
-msgid "Reproducir"
-msgstr "Play"
-
-#: /home/jgomez/desarrollos/kakapo/resources/main.glade:228
+#: /home/jgomez/desarrollos/kakapo/resources/main.glade:230
 msgid "play"
 msgstr "Play"
+
+#~ msgid "_Archivo"
+#~ msgstr "File"
+#~ msgid "Nuevo"
+#~ msgstr "New"
+#~ msgid "Abrir"
+#~ msgstr "Open"
+#~ msgid "Generar Archivo de Audio"
+#~ msgstr "Generate Audio File"
+#~ msgid "Reproducir Texto"
+#~ msgstr "Play Text"
+#~ msgid "Salir"
+#~ msgstr "Quit"
+#~ msgid "Ay_uda"
+#~ msgstr "Help"
+#~ msgid "Aplicar"
+#~ msgstr "Apply"
+#~ msgid "Reproducir"
+#~ msgstr "Play"
 
