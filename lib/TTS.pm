@@ -64,10 +64,10 @@ sub convert {
         case "Archivos Mp3" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
     }
 
-    my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
-        "Conversion Finalizada" );
-    my $resp = $dialog->run;
-    $dialog->destroy if ( $resp eq "ok" );
+ #   my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
+ #       "Conversion Finalizada" );
+ #   my $resp = $dialog->run;
+ #   $dialog->destroy if ( $resp eq "ok" );
     $self->{apply}->set_sensitive(1);
     $self->{play}->set_sensitive(1);
 
