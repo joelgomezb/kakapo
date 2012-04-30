@@ -59,15 +59,31 @@ sub convert {
     my $cmd   = "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)'";
     system($cmd);
 
+    if ( $? == -1 ) {
+        error_msg($!);
+        $self->{logdebug}->debug("Error: $!");
+        $self->{apply}->set_sensitive(1);
+        $self->{play}->set_sensitive(1);
+        return 0;
+    }
+
     switch ($sel_filter) {
         case "Archivos Ogg" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
         case "Archivos Mp3" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
     }
 
- #   my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
- #       "Conversion Finalizada" );
- #   my $resp = $dialog->run;
- #   $dialog->destroy if ( $resp eq "ok" );
+    if ( $? == -1 ) {
+        error_msg($!);
+        $self->{logdebug}->debug("Error: $!");
+        $self->{apply}->set_sensitive(1);
+        $self->{play}->set_sensitive(1);
+        return 0;
+    }
+
+    my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
+        "Finished!!!" );
+    my $resp = $dialog->run;
+    $dialog->destroy if ( $resp eq "ok" );
     $self->{apply}->set_sensitive(1);
     $self->{play}->set_sensitive(1);
 
