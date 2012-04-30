@@ -15,7 +15,7 @@ use Gtk2 '-init';
 use OpenOffice::OODoc;
 use Text::Extract::Word qw(get_all_text);
 
-our @ISA = qw(Exporter);
+our @ISA    = qw(Exporter);
 our @EXPORT = qw(load_file);
 
 =head1 NAME
@@ -29,7 +29,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -52,133 +51,145 @@ if you don't export anything, such as for a purely object-oriented module.
 =head2 function1
 
 =cut
+
 sub load_file {
-	my ( $self, $file ) = @_;
+    my ( $self, $file ) = @_;
 
-	my $fh = IO::File->new( $self->{tmp} , "w");
+    my $fh = IO::File->new( $self->{tmp}, "w" );
 
+    my $mime_type = `file --mime-type "$file" | cut -d: -f2 | awk '{print \$1}'`;
+    chomp($mime_type);
+    $self->{logdebug}->debug($mime_type);
 
-	my $mime_type = `file --mime-type "$file" | cut -d: -f2 | awk '{print \$1}'`;
-	chomp($mime_type);
-	$self->{log}->debug($mime_type);
-
-	switch ( $mime_type ) {
-		case  "text/plain" { txt ( $self, $file ); }
-		case  "application/pdf" { pdf ( $self, $file ); }
-		case  "application/vnd.oasis.opendocument.text" { odt ( $self, $file ); }
-		case  { "application/msword" || "application/vnd.ms-office" } { doc ( $self, $file ); }
-		else {		
-				my $dialog = Gtk2::MessageDialog->new($self->{ventana_principal},
-                                      'destroy-with-parent',
-                                      'error',
-                                      'ok',
-                                      "Tipo de Archivo no Soportado");
-				my $resp = $dialog->run;
-				$dialog->destroy if ( $resp eq "ok" );
-				return 1;
-			}
-	 }
+    switch ($mime_type) {
+        case "text/plain" { txt( $self, $file ); }
+        case "application/pdf" { pdf( $self, $file ); }
+        case "application/vnd.oasis.opendocument.text" { odt( $self, $file ); }
+        case { "application/msword" || "application/vnd.ms-office" }
+        {
+            doc( $self, $file );
+        }
+        else {
+            my $dialog = Gtk2::MessageDialog->new( $self->{ventana_principal},
+                'destroy-with-parent', 'error', 'ok', "Tipo de Archivo no Soportado" );
+            my $resp = $dialog->run;
+            $dialog->destroy if ( $resp eq "ok" );
+            return 1;
+        }
+    }
 }
 
 sub txt {
-	my ( $self, $file ) = @_;
+    my ( $self, $file ) = @_;
 
+    my $buffer_file = Gtk2::TextBuffer->new;
+    open( LISTA, $file ) || die("tu madre");
+    while (<LISTA>) {
+        $buffer_file->insert_at_cursor( decode( "utf8", $_ ) );
+        write_file( $self->{tmp}, { binmode => ':utf8', append => 1 }, decode( "utf8", $_ ) );
+    }
+    close(LISTA);
 
-	my $buffer_file = Gtk2::TextBuffer->new;
-			open(LISTA, $file) || die("tu madre");
-			while(<LISTA>){
-				$buffer_file->insert_at_cursor( decode("utf8", $_) );
-				write_file( $self->{tmp}, { binmode => ':utf8' , append => 1 }, decode ("utf8", $_ ) );
-			}
-			close(LISTA);	
+    Glib::Timeout->add(
+        1000,
+        sub {
+            $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
+            open ARCHIVO, "<$self->{tmp}";
+            my @archivo = <ARCHIVO>;
+            $buffer_file->set_text( decode( "utf8", "@archivo" ) );
+            $self->{text}->set_buffer($buffer_file);
+            my $end_mark = $buffer_file->create_mark( 'end', $buffer_file->get_end_iter, FALSE );
+            $self->{text}->scroll_to_mark( $end_mark, 0.0, TRUE, 0.0, 1.0 );
+        }
+    );
+    close(ARCHIVO);
 
-		Glib::Timeout->add(1000, sub {
-				$self->{message_id} = $self->{statusbar}->push($self->{context_id}, $file);	
-				open ARCHIVO, "<$self->{tmp}";
-				my @archivo = <ARCHIVO>;
-				$buffer_file->set_text(decode ( "utf8", "@archivo" ) );
-				$self->{text}->set_buffer($buffer_file);
-				my $end_mark = $buffer_file->create_mark('end', $buffer_file->get_end_iter, FALSE);
-				$self->{text}->scroll_to_mark ($end_mark, 0.0, TRUE, 0.0, 1.0);
-		});
-		close (ARCHIVO);
+    $self->{apply}->set_sensitive(1);
+    $self->{play}->set_sensitive(1);
 
-	$self->{apply}->set_sensitive(1);
-	$self->{play}->set_sensitive(1);
-
-	$self->{message_id} = $self->{statusbar}->push($self->{context_id}, "Cargando...");	
+    $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, "Cargando..." );
 
 }
 
 sub pdf {
-	my ( $self, $file ) = @_;
+    my ( $self, $file ) = @_;
 
-	my $buffer_file = Gtk2::TextBuffer->new;
+    my $buffer_file = Gtk2::TextBuffer->new;
 
-	Glib::Timeout->add(1000, sub {
-			`pdftotext -layout -eol unix '$file' $self->{tmp}`;
-			edit_file { s///gi } $self->{tmp} ;
-			open ARCHIVO, "<$self->{tmp}";
-			my @archivo = <ARCHIVO>;
-			$buffer_file->set_text(decode ( "utf8", "@archivo" ) );
-			$self->{text}->set_buffer($buffer_file);
-			my $end_mark = $buffer_file->create_mark('end', $buffer_file->get_end_iter, FALSE);
-			$self->{text}->scroll_to_mark ($end_mark, 0.0, TRUE, 0.0, 1.0);
-	});
-	close (ARCHIVO);
+    Glib::Timeout->add(
+        1000,
+        sub {
+            $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
+            `pdftotext -layout -eol unix '$file' $self->{tmp}`;
+            edit_file {s///gi} $self->{tmp};
+            open ARCHIVO, "<$self->{tmp}";
+            my @archivo = <ARCHIVO>;
+            $buffer_file->set_text( decode( "utf8", "@archivo" ) );
+            $self->{text}->set_buffer($buffer_file);
+            my $end_mark = $buffer_file->create_mark( 'end', $buffer_file->get_end_iter, FALSE );
+            $self->{text}->scroll_to_mark( $end_mark, 0.0, TRUE, 0.0, 1.0 );
+        }
+    );
+    close(ARCHIVO);
 
-	$self->{apply}->set_sensitive(1);
-	$self->{play}->set_sensitive(1);
+    $self->{apply}->set_sensitive(1);
+    $self->{play}->set_sensitive(1);
+
+    $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, "Cargando..." );
 }
 
 sub odt {
-	my ( $self, $file ) = @_;
+    my ( $self, $file ) = @_;
 
-	my $buffer_file = Gtk2::TextBuffer->new;
+    my $buffer_file = Gtk2::TextBuffer->new;
 
-			ooLocalEncoding 'utf8';
-			my $doc = ooDocument(file => $file);
-			my $result = $doc->getTextContent;
-			write_file( $self->{tmp}, { binmode => ':utf8' , append => 1 }, decode ("utf8", $result ) );
+    `odt2txt '$file' --output=$self->{tmp}`;
 
-	Glib::Timeout->add(1000, sub {
+    Glib::Timeout->add(
+        1000,
+        sub {
+            $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
+            open ARCHIVO, "<$self->{tmp}";
+            my @archivo = <ARCHIVO>;
+            $buffer_file->set_text( decode( "utf8", "@archivo" ) );
+            $self->{text}->set_buffer($buffer_file);
+            my $end_mark = $buffer_file->create_mark( 'end', $buffer_file->get_end_iter, FALSE );
+            $self->{text}->scroll_to_mark( $end_mark, 0.0, TRUE, 0.0, 1.0 );
+        }
+    );
+    close(ARCHIVO);
 
-			open ARCHIVO, "<$self->{tmp}";
-			my @archivo = <ARCHIVO>;
-			$buffer_file->set_text(decode ( "utf8", "@archivo" ) );
-			$self->{text}->set_buffer($buffer_file);
-			my $end_mark = $buffer_file->create_mark('end', $buffer_file->get_end_iter, FALSE);
-			$self->{text}->scroll_to_mark ($end_mark, 0.0, TRUE, 0.0, 1.0);
-	});
-	close (ARCHIVO);
+    $self->{apply}->set_sensitive(1);
+    $self->{play}->set_sensitive(1);
 
-	$self->{apply}->set_sensitive(1);
-	$self->{play}->set_sensitive(1);
+    $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, "Cargando..." );
 }
 
 sub doc {
-	my ( $self, $file ) = @_;
+    my ( $self, $file ) = @_;
 
-	my $buffer_file = Gtk2::TextBuffer->new;
+    my $buffer_file = Gtk2::TextBuffer->new;
 
- 	my $text = get_all_text( $file );
-	write_file( $self->{tmp}, { binmode => ':utf8' , append => 1 }, decode ("utf8", $text ) );
+    my $text = get_all_text($file);
+    write_file( $self->{tmp}, { binmode => ':utf8', append => 1 }, decode( "utf8", $text ) );
 
-	Glib::Timeout->add(1000, sub {
+    Glib::Timeout->add(
+        1000,
+        sub {
 
-			open ARCHIVO, "<$self->{tmp}";
-			my @archivo = <ARCHIVO>;
-			$buffer_file->set_text(decode ( "utf8", "@archivo" ) );
-			$self->{text}->set_buffer($buffer_file);
-			my $end_mark = $buffer_file->create_mark('end', $buffer_file->get_end_iter, FALSE);
-			$self->{text}->scroll_to_mark ($end_mark, 0.0, TRUE, 0.0, 1.0);
-	});
-	close (ARCHIVO);
+            open ARCHIVO, "<$self->{tmp}";
+            my @archivo = <ARCHIVO>;
+            $buffer_file->set_text( decode( "utf8", "@archivo" ) );
+            $self->{text}->set_buffer($buffer_file);
+            my $end_mark = $buffer_file->create_mark( 'end', $buffer_file->get_end_iter, FALSE );
+            $self->{text}->scroll_to_mark( $end_mark, 0.0, TRUE, 0.0, 1.0 );
+        }
+    );
+    close(ARCHIVO);
 
-	$self->{apply}->set_sensitive(1);
-	$self->{play}->set_sensitive(1);
+    $self->{apply}->set_sensitive(1);
+    $self->{play}->set_sensitive(1);
 }
-
 
 =head1 AUTHOR
 
@@ -247,4 +258,4 @@ if not, write to the Free Software Foundation, Inc.,
 
 =cut
 
-1; # End of Kakapo
+1;    # End of Kakapo
