@@ -3,6 +3,7 @@ package Kakapo;
 use strict;
 use warnings;
 use Gtk2 '-init';
+use Glib qw/TRUE FALSE/;
 set_locale Gtk2;
 use Gtk2::Ex::Simple::List;
 use Gtk2::GladeXML;
@@ -66,7 +67,7 @@ sub run {
     $self->{window}->signal_connect(
         'delete_event' => sub { unlink( $self->{tmp} ) if ( -e $self->{tmp} ); Gtk2->main_quit; }
     );
-	Gtk2->set_locale;
+    Gtk2->set_locale;
     Gtk2->main;
 }
 
@@ -77,7 +78,7 @@ sub begin {
     my %config = $conf->getall;
 
     $self->{tmp}        = $config{general}->{tmp};
-    $self->{logfile}        = $config{general}->{logfile};
+    $self->{logfile}    = $config{general}->{logfile};
     $self->{wav}        = $config{general}->{wav};
     $self->{host}       = $config{festival}->{host};
     $self->{port}       = $config{festival}->{port};
@@ -88,7 +89,7 @@ sub begin {
         File::Spec->rel2abs( File::Spec->curdir() ) . "/resources/log4perl.conf" );
     my $logger = Log::Log4perl->get_logger('log');
 
-    $self->{log} = $logger;
+    $self->{logdebug} = $logger;
 
     $self->{apply}->set_sensitive(0);
     $self->{play}->set_sensitive(0);
@@ -172,7 +173,7 @@ sub on_open_clicked {
     if ( $dialog->run eq 'ok' ) {
         my $file = $dialog->get_filename;
         load_file( $self, $file );
-        $self->{log}->debug("File: $file");
+        $self->{logdebug}->debug("File: $file");
     }
 
     $dialog->destroy;
@@ -195,7 +196,7 @@ sub on_apply_clicked {
         'gtk-cancel' => 'cancel'
     );
     $dialog->set_current_name("kakapo.ogg");
-	$dialog->set_do_overwrite_confirmation(1);
+    $dialog->set_do_overwrite_confirmation(1);
 
     my $filter = Gtk2::FileFilter->new;
     $filter->set_name("Archivos Ogg");
@@ -207,19 +208,42 @@ sub on_apply_clicked {
 
     $dialog->add_filter($filter);
     $dialog->add_filter($filter2);
-		
 
     if ( $dialog->run eq 'ok' ) {
-        my $file = $dialog->get_filename;
-		my $filter = $dialog->get_filter();
-		my $sel_filter = $filter->get_name();
-		$self->{log}->debug($sel_filter);
-		$self->{log}->debug($file);
+        my $file       = $dialog->get_filename;
+        my $filter     = $dialog->get_filter();
+        my $sel_filter = $filter->get_name();
+        $self->{logdebug}->debug($sel_filter);
+        $self->{logdebug}->debug($file);
+        $dialog->destroy;
+
+        my $dialog2 = Gtk2::MessageDialog->new( $self->{window}, [], 'info', 'ok',
+            sprintf "This message box has been popped up the following\n" );
+
+        my $progress = Gtk2::ProgressBar->new;
+        $progress->set_pulse_step(.1);
+        $dialog2->vbox->pack_start( $progress, FALSE, FALSE, 0 );
+        $dialog2->show_all;
+
+        while ( Gtk2->events_pending() ) { Gtk2->main_iteration(); }
+        my $timer = Glib::Timeout->add( 100, \&update, $progress );
+
         convert( $self, $file, $sel_filter );
+
+        $dialog2->destroy;
+        $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
+
     }
 
     $dialog->destroy;
 
+}
+
+sub update {
+    my $progress = shift;
+    $progress->pulse;
+#    while ( Gtk2->events_pending() ) { Gtk2->main_iteration(); }
+    return 1;
 }
 
 sub on_new_clicked {
@@ -239,6 +263,26 @@ sub on_newitem_activate {
     my $self = shift;
 
     $self->on_new_clicked;
+}
+
+sub on_aboutitem_activate {
+    my $self = shift;
+
+    my $about = Gtk2::AboutDialog->new;
+
+    #    $about->set_name('Kakapo');
+    $about->set_authors('Joel Gomez');
+    $about->set_version('0.1');
+    $about->set_website('http://github.com/joelgomezb/kakapo');
+    $about->set_comments('Kakapo...');
+    $about->set_license( "This program is free software; you can redistribute it\n"
+            . "and/or modify it under the terms of either:\n\n"
+            . "a) the GNU General Public License as published by\n"
+            . "the Free Software Foundation; either version 1, or\n"
+            . "(at your option) any later version, or\n\n"
+            . "b) the 'Artistic License'.\n\n" );
+    $about->run;
+    $about->destroy;
 }
 
 sub gtk_main_quit {
