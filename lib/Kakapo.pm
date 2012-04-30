@@ -217,6 +217,7 @@ sub on_apply_clicked {
         $self->{logdebug}->debug($file);
         $dialog->destroy;
 
+		$DB::single=1;
         my $dialog2 = Gtk2::MessageDialog->new( $self->{window}, [], 'info', 'ok',
             sprintf "This message box has been popped up the following\n" );
 
@@ -225,11 +226,21 @@ sub on_apply_clicked {
         $dialog2->vbox->pack_start( $progress, FALSE, FALSE, 0 );
         $dialog2->show_all;
 
-        while ( Gtk2->events_pending() ) { Gtk2->main_iteration(); }
-        my $timer = Glib::Timeout->add( 100, \&update, $progress );
+		my $loop = Glib::MainLoop->new;
+#      my $timer = Glib::Timeout->add( 100, \&update, $progress );
+		Glib::Timeout->add (100, sub {
+				if ( convert( $self, $file, $sel_filter ) ) {
+ 						while ( Gtk2->events_pending() ) { Gtk2->main_iteration(); }
+						return TRUE;
+				}else{
+					&update( $progress );
+					return FALSE;
+				}
+		  });
+	  	$loop->run;
+		$loop->quit;
 
-        convert( $self, $file, $sel_filter );
-
+        $dialog2->hide;
         $dialog2->destroy;
         $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
 
