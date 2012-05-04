@@ -77,13 +77,14 @@ sub begin {
     my $conf = new Config::General( File::Spec->rel2abs( File::Spec->curdir() ) . "/kakapo.conf" );
     my %config = $conf->getall;
 
-    $self->{tmp}        = $config{general}->{tmp};
-    $self->{logfile}    = $config{general}->{logfile};
-    $self->{wav}        = $config{general}->{wav};
-    $self->{host}       = $config{festival}->{host};
-    $self->{port}       = $config{festival}->{port};
-    $self->{cmd}        = $config{festival}->{cmd};
-    $self->{context_id} = $self->{statusbar}->get_context_id("Statusbar");
+    $self->{tmp}         = $config{general}->{tmp};
+    $self->{logfile}     = $config{general}->{logfile};
+    $self->{wav}         = $config{general}->{wav};
+    $self->{syn_default} = $config{general}->{syn_default};
+    $self->{host}        = $config{festival}->{host};
+    $self->{port}        = $config{festival}->{port};
+    $self->{cmd}         = $config{festival}->{cmd};
+    $self->{context_id}  = $self->{statusbar}->get_context_id("Statusbar");
 
     Log::Log4perl::init_and_watch(
         File::Spec->rel2abs( File::Spec->curdir() ) . "/resources/log4perl.conf" );
@@ -217,45 +218,15 @@ sub on_apply_clicked {
         $self->{logdebug}->debug($file);
         $dialog->destroy;
 
-		$DB::single=1;
-        my $dialog2 = Gtk2::MessageDialog->new( $self->{window}, [], 'info', 'ok',
-            sprintf "This message box has been popped up the following\n" );
+       
 
-        my $progress = Gtk2::ProgressBar->new;
-        $progress->set_pulse_step(.1);
-        $dialog2->vbox->pack_start( $progress, FALSE, FALSE, 0 );
-        $dialog2->show_all;
-
-		my $loop = Glib::MainLoop->new;
-#      my $timer = Glib::Timeout->add( 100, \&update, $progress );
-		Glib::Timeout->add (100, sub {
-				if ( convert( $self, $file, $sel_filter ) ) {
- 						while ( Gtk2->events_pending() ) { Gtk2->main_iteration(); }
-						return TRUE;
-				}else{
-					&update( $progress );
-					return FALSE;
-				}
-		  });
-	  	$loop->run;
-		$loop->quit;
-
-        $dialog2->hide;
-        $dialog2->destroy;
+        #      my $timer = Glib::Timeout->add( 100, \&update, $progress );
+        convert( $self, $file, $sel_filter );
         $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
 
-    }
-
-    $dialog->destroy;
-
+	}
 }
 
-sub update {
-    my $progress = shift;
-    $progress->pulse;
-#    while ( Gtk2->events_pending() ) { Gtk2->main_iteration(); }
-    return 1;
-}
 
 sub on_new_clicked {
     my $self = shift;
@@ -296,6 +267,29 @@ sub on_aboutitem_activate {
     $about->destroy;
 }
 
+sub on_preferences_activate {
+    my $self = shift;
+
+	if ( $self->{syn_default} eq 'Festival') {
+		$self->{synthesizer}->set_active(1);
+	}else{
+		$self->{synthesizer}->set_active(0);
+	}
+    $self->{preferences_window}->show;
+}
+
+sub on_pref_apply_activate {
+	my $self = shift;
+
+	print "joelgomezb";
+	my $conf = new Config::General( File::Spec->rel2abs( File::Spec->curdir() ) . "/kakapo.conf" );
+    my %config = $conf->getall;
+
+	$config{general}{syn_default} = $self->{synthesizer}->get_active_text;
+	$conf->save_file("kakapo.conf", \%config);
+	$self->{preferences_window}->destroy;
+
+}
 sub gtk_main_quit {
     my ($self) = shift;
 
