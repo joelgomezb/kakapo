@@ -10,6 +10,7 @@ use Exporter;
 use Switch;
 use Data::Dumper;
 use File qw( load_file );
+use Glib qw/TRUE FALSE/;
 
 our @ISA    = qw(Exporter);
 our @EXPORT = qw( convert );
@@ -56,37 +57,70 @@ sub convert {
 
     load_file( $self, $file ) unless ( -e $self->{tmp} );
     my $voice = "voice_" . $self->{voices}->get_active_text;
-    my $cmd   = "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)'";
-    system($cmd);
 
-    if ( $? == -1 ) {
-        error_msg($!);
-        $self->{logdebug}->debug("Error: $!");
-        $self->{apply}->set_sensitive(1);
-        $self->{play}->set_sensitive(1);
-        return 0;
-    }
+    #    my $cmd   = "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)'";
+    #    system($cmd);
 
-    switch ($sel_filter) {
-        case "Archivos Ogg" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
-        case "Archivos Mp3" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
-    }
+#    switch ($sel_filter) {
+#        case "Archivos Ogg" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
+#        case "Archivos Mp3" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
+#    }
+    my $dialog2 = Gtk2::MessageDialog->new( $self->{window}, [], 'info', 'ok',
+        sprintf "Wait a minute, this take a while\n" );
 
-    if ( $? == -1 ) {
-        error_msg($!);
-        $self->{logdebug}->debug("Error: $!");
-        $self->{apply}->set_sensitive(1);
-        $self->{play}->set_sensitive(1);
-        return 0;
-    }
+    my $progress = Gtk2::ProgressBar->new;
+    $progress->set_pulse_step(.1);
+    $dialog2->vbox->pack_start( $progress, FALSE, FALSE, 0 );
+    $dialog2->show_all;
 
-    my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
-        "Finished!!!" );
-    my $resp = $dialog->run;
-    $dialog->destroy if ( $resp eq "ok" );
-    $self->{apply}->set_sensitive(1);
-    $self->{play}->set_sensitive(1);
+	 my $running = TRUE;
 
+# Timer will run until callback returns false
+  	my $timer = Glib::Timeout->add (100, sub { if ($running) {
+                                              $progress->pulse;
+                                              return TRUE;
+                                             }
+                                             else {
+                                              return FALSE;
+                                             } });
+
+    open FH, "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)' 1>> $self->{logfile}  2>&1 |" or die error_msg( $! );
+
+    Glib::IO->add_watch(fileno FH, [ 'in', 'hup' ], sub {
+            my ( $fileon, $condition ) = @_;
+
+            if ( $condition eq 'in' ) {
+				 $progress->pulse;
+				 print "JoelgomezB\n";
+            }
+
+            if ( $condition eq 'hup' ) {
+				$dialog2->destroy;
+				my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
+			        "Conversion Finalizada" );
+			    my $resp = $dialog->run;
+			    $dialog->destroy if ( $resp eq "ok" );
+			    $self->{apply}->set_sensitive(1);
+			    $self->{play}->set_sensitive(1);
+
+                close FH;
+                return FALSE;
+            }
+
+            return TRUE;
+
+        }
+    );
+
+#    system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 ");
+}
+
+sub update {
+    my $progress = shift;
+    $progress->pulse;
+
+    #    while ( Gtk2->events_pending() ) { Gtk2->main_iteration(); }
+    return 1;
 }
 
 =head1 AUTHOR
