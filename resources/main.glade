@@ -121,11 +121,13 @@
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkImageMenuItem" id="Preferences">
+                      <widget class="GtkImageMenuItem" id="preferences">
                         <property name="label">gtk-preferences</property>
                         <property name="visible">True</property>
                         <property name="tooltip" translatable="yes">Preferences</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_preferences_activate"/>
                       </widget>
                     </child>
                   </widget>
@@ -299,6 +301,77 @@
             <property name="expand">False</property>
             <property name="pack_type">end</property>
             <property name="position">3</property>
+          </packing>
+        </child>
+      </widget>
+    </child>
+  </widget>
+  <widget class="GtkWindow" id="preferences_window">
+    <property name="width_request">350</property>
+    <property name="height_request">260</property>
+    <property name="title" translatable="yes">Preferences</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="destroy_with_parent">True</property>
+    <child>
+      <widget class="GtkFixed" id="fixed1">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkLabel" id="label1">
+            <property name="width_request">100</property>
+            <property name="height_request">23</property>
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Synthesizer</property>
+          </widget>
+          <packing>
+            <property name="x">40</property>
+            <property name="y">44</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkComboBox" id="synthesizer">
+            <property name="width_request">200</property>
+            <property name="height_request">37</property>
+            <property name="visible">True</property>
+            <property name="items" translatable="yes">Espeak
+Festival</property>
+          </widget>
+          <packing>
+            <property name="x">134</property>
+            <property name="y">40</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="pref_apply">
+            <property name="label">gtk-apply</property>
+            <property name="width_request">100</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+            <signal name="activate" handler="on_pref_apply_activate"/>
+          </widget>
+          <packing>
+            <property name="x">70</property>
+            <property name="y">200</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="pref_cancel">
+            <property name="label">gtk-cancel</property>
+            <property name="width_request">100</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+            <signal name="activate" handler="on_pref_cancel_activate"/>
+          </widget>
+          <packing>
+            <property name="x">200</property>
+            <property name="y">200</property>
           </packing>
         </child>
       </widget>
