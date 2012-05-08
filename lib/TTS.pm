@@ -53,19 +53,24 @@ sub convert {
     my ( $self, $file, $sel_filter ) = @_;
 
     $self->{apply}->set_sensitive(0);
+    $self->{applyitem}->set_sensitive(0);
     $self->{play}->set_sensitive(0);
+    $self->{playitem}->set_sensitive(0);
 
     load_file( $self, $file ) unless ( -e $self->{tmp} );
     my $voice = "voice_" . $self->{voices}->get_active_text;
 
-    #    my $cmd   = "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)'";
-    #    system($cmd);
+    switch ($sel_filter) {
+        case "Archivos Ogg" { toaudio( $self, $file, $sel_filter, $voice ); }
+        case "Archivos Mp3" { toaudio( $self, $file, $sel_filter, $voice ); }
+    }
+}
 
-#    switch ($sel_filter) {
-#        case "Archivos Ogg" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
-#        case "Archivos Mp3" { system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 "); }
-#    }
-    my $dialog2 = Gtk2::MessageDialog->new( $self->{window}, [], 'info', 'ok',
+sub toaudio {
+	my ( $self, $file, $sel_fiter, $voice ) = @_;
+
+
+    my $dialog2 = Gtk2::MessageDialog->new( $self->{window}, [], 'info', 'GTK_BUTTONS_NONE',
         sprintf "Wait a minute, this take a while\n" );
 
     my $progress = Gtk2::ProgressBar->new;
@@ -73,37 +78,37 @@ sub convert {
     $dialog2->vbox->pack_start( $progress, FALSE, FALSE, 0 );
     $dialog2->show_all;
 
-	 my $running = TRUE;
-
-# Timer will run until callback returns false
+	my $running = TRUE;
   	my $timer = Glib::Timeout->add (100, sub { if ($running) {
                                               $progress->pulse;
+#												return FALSE if ( $dialog2->run eq 'cancel' );
                                               return TRUE;
                                              }
                                              else {
                                               return FALSE;
                                              } });
 
-    open FH, "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)' 1>> $self->{logfile}  2>&1 |" or die error_msg( $! );
+    open FH, "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)' 1>> $self->{logfile}  2>&1 |" or error_msg( $! );
+	$progress->set_text("Creating Wav File");
+	open FH2, "lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 |" or error_msg( $! );
+	$progress->set_text("Creating OGG/MP3 File");
 
     Glib::IO->add_watch(fileno FH, [ 'in', 'hup' ], sub {
             my ( $fileon, $condition ) = @_;
 
-            if ( $condition eq 'in' ) {
-				 $progress->pulse;
-				 print "JoelgomezB\n";
-            }
-
             if ( $condition eq 'hup' ) {
 				$dialog2->destroy;
 				my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
-			        "Conversion Finalizada" );
+			        "Finished" );
 			    my $resp = $dialog->run;
 			    $dialog->destroy if ( $resp eq "ok" );
 			    $self->{apply}->set_sensitive(1);
+			    $self->{applyitem}->set_sensitive(1);
 			    $self->{play}->set_sensitive(1);
+			    $self->{playitem}->set_sensitive(1);
 
                 close FH;
+                close FH2;
                 return FALSE;
             }
 
@@ -112,15 +117,6 @@ sub convert {
         }
     );
 
-#    system("lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 ");
-}
-
-sub update {
-    my $progress = shift;
-    $progress->pulse;
-
-    #    while ( Gtk2->events_pending() ) { Gtk2->main_iteration(); }
-    return 1;
 }
 
 =head1 AUTHOR
