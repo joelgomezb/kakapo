@@ -79,7 +79,7 @@ sub load_file {
 sub txt {
     my ( $self, $file ) = @_;
 
-    my $buffer_file = Gtk2::TextBuffer->new;
+ my $buffer_file = Gtk2::TextBuffer->new;
     open( LISTA, $file ) || die error_msg($?);
     while (<LISTA>) {
         $buffer_file->insert_at_cursor( decode( "utf8", $_ ) );
@@ -102,7 +102,9 @@ sub txt {
     close(ARCHIVO);
 
     $self->{apply}->set_sensitive(1);
+    $self->{applyitem}->set_sensitive(1);
     $self->{play}->set_sensitive(1);
+    $self->{playitem}->set_sensitive(1);
 
     $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, "Cargando..." );
 
@@ -130,7 +132,9 @@ sub pdf {
     close(ARCHIVO);
 
     $self->{apply}->set_sensitive(1);
+    $self->{applyitem}->set_sensitive(1);
     $self->{play}->set_sensitive(1);
+    $self->{playitem}->set_sensitive(1);
 
     $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, "Cargando..." );
 }
@@ -157,7 +161,9 @@ sub odt {
     close(ARCHIVO);
 
     $self->{apply}->set_sensitive(1);
+    $self->{applyitem}->set_sensitive(1);
     $self->{play}->set_sensitive(1);
+    $self->{playitem}->set_sensitive(1);
 
     $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, "Cargando..." );
 }
@@ -185,7 +191,9 @@ sub doc {
     close(ARCHIVO);
 
     $self->{apply}->set_sensitive(1);
+    $self->{applyitem}->set_sensitive(1);
     $self->{play}->set_sensitive(1);
+    $self->{playitem}->set_sensitive(1);
 }
 
 =head1 AUTHOR
