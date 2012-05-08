@@ -190,9 +190,21 @@
                 <property name="visible">True</property>
                 <property name="has_tooltip">True</property>
                 <property name="tooltip" translatable="yes">Open</property>
-                <property name="label" translatable="yes">Open</property>
+                <property name="label" translatable="yes">open</property>
                 <property name="stock_id">gtk-open</property>
                 <signal name="clicked" handler="on_open_clicked"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="scan">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">scan</property>
+                <property name="use_underline">True</property>
+                <property name="icon">scanner.svg</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -351,6 +363,7 @@ Festival</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
+            <signal name="clicked" handler="on_pref_apply_clicked"/>
             <signal name="activate" handler="on_pref_apply_activate"/>
           </widget>
           <packing>
@@ -367,6 +380,7 @@ Festival</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
+            <signal name="clicked" handler="on_pref_cancel_clicked"/>
             <signal name="activate" handler="on_pref_cancel_activate"/>
           </widget>
           <packing>
