@@ -93,7 +93,9 @@ sub begin {
     $self->{logdebug} = $logger;
 
     $self->{apply}->set_sensitive(0);
+    $self->{applyitem}->set_sensitive(0);
     $self->{play}->set_sensitive(0);
+    $self->{playitem}->set_sensitive(0);
 
    #    my @installed = `dpkg -l festival | grep i | awk \'{print \$2}'`;
    #    unless ( map ( /Festival/i, @installed ) ) {
@@ -270,24 +272,47 @@ sub on_aboutitem_activate {
 sub on_preferences_activate {
     my $self = shift;
 
-	if ( $self->{syn_default} eq 'Festival') {
+	my $conf = new Config::General( File::Spec->rel2abs( File::Spec->curdir() ) . "/kakapo.conf" );
+    my %config = $conf->getall;
+
+
+	if ( $config{general}->{syn_default} eq 'Festival') {
 		$self->{synthesizer}->set_active(1);
 	}else{
 		$self->{synthesizer}->set_active(0);
 	}
-    $self->{preferences_window}->show;
+    $self->{preferences_window}->show_all;
+}
+
+sub on_pref_apply_clicked {
+	my $self = shift;
+
+	$self->on_pref_apply_activate( $self );
+}
+
+sub on_pref_cancel_clicked {
+	my $self = shift;
+
+	$self->{preferences_window}->hide;
+}
+
+sub on_pref_cancel_activate {
+	my $self = shift;
+
+	$self->on_pref_cancel_clicked( $self );
 }
 
 sub on_pref_apply_activate {
 	my $self = shift;
 
-	print "joelgomezb";
 	my $conf = new Config::General( File::Spec->rel2abs( File::Spec->curdir() ) . "/kakapo.conf" );
     my %config = $conf->getall;
 
 	$config{general}{syn_default} = $self->{synthesizer}->get_active_text;
 	$conf->save_file("kakapo.conf", \%config);
-	$self->{preferences_window}->destroy;
+	$self->{preferences_window}->hide;
+	$self->{message_id} = $self->{statusbar}->push( $self->{context_id}, "Preferences Updated..." );
+
 
 }
 sub gtk_main_quit {
