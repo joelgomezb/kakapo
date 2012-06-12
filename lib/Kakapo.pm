@@ -177,7 +177,9 @@ sub on_open_clicked {
         my $file = $dialog->get_filename;
         load_file( $self, $file );
         $self->{logdebug}->debug("File: $file");
-    }
+    }else{
+		$dialog->destroy;
+	}
 
     $dialog->destroy;
 }
@@ -310,6 +312,7 @@ sub on_pref_apply_activate {
 
 	$config{general}{syn_default} = $self->{synthesizer}->get_active_text;
 	$conf->save_file("kakapo.conf", \%config);
+	$self->{syn_default} = $self->{synthesizer}->get_active_text;
 	$self->{preferences_window}->hide;
 	$self->{message_id} = $self->{statusbar}->push( $self->{context_id}, "Preferences Updated..." );
 
