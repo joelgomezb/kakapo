@@ -52,6 +52,7 @@ if you don't export anything, such as for a purely object-oriented module.
 sub convert {
     my ( $self, $file, $sel_filter ) = @_;
 
+	my $syn_default;
     $self->{apply}->set_sensitive(0);
     $self->{applyitem}->set_sensitive(0);
     $self->{play}->set_sensitive(0);
@@ -60,9 +61,17 @@ sub convert {
     load_file( $self, $file ) unless ( -e $self->{tmp} );
     my $voice = "voice_" . $self->{voices}->get_active_text;
 
+	if ( $self->{syn_default} eq 'Festival' ){
+		$syn_default = 'Festival';
+	}elsif ( $self->{syn_default} eq 'Espeak' ) {
+		$syn_default = 'Espeak';
+	}else{
+		error_msg("Error in config file, no synthesizer detected");
+		return 0;
+	}
     switch ($sel_filter) {
-        case "Archivos Ogg" { toaudio( $self, $file, $sel_filter, $voice ); }
-        case "Archivos Mp3" { toaudio( $self, $file, $sel_filter, $voice ); }
+        case "Archivos Ogg" { toaudio( $self, $file, $sel_filter, $voice, $syn_default ); }
+        case "Archivos Mp3" { toaudio( $self, $file, $sel_filter, $voice, $syn_default ); }
     }
 }
 
