@@ -47,6 +47,14 @@
                       </widget>
                     </child>
                     <child>
+                      <widget class="GtkMenuItem" id="scanitem">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Scan</property>
+                        <property name="label" translatable="yes">Scan</property>
+                        <property name="use_underline">True</property>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkSeparatorMenuItem" id="menuitem3">
                         <property name="visible">True</property>
                       </widget>
