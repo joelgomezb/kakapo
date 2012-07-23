@@ -258,6 +258,7 @@ sub on_aboutitem_activate {
 
     #    $about->set_name('Kakapo');
     $about->set_authors('Joel Gomez');
+	$about->set_logo( Gtk2::Gdk::Pixbuf->new_from_file( "resources/kakapo128x128.png" ));
     $about->set_version('0.1');
     $about->set_website('http://github.com/joelgomezb/kakapo');
     $about->set_comments('Kakapo...');
