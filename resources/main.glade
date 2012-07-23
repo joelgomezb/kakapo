@@ -9,6 +9,7 @@
     <property name="window_position">center</property>
     <property name="default_width">400</property>
     <property name="default_height">600</property>
+    <property name="icon">kakapo-128x128.svg</property>
     <child>
       <widget class="GtkVBox" id="vbox">
         <property name="width_request">516</property>
