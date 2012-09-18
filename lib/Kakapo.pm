@@ -17,6 +17,7 @@ use Data::Dumper;
 use base qw( Gtk2::GladeXML::Simple );
 use Common qw( error_msg question_msg connect_festival );
 use File qw(load_file);
+use Speech::eSpeak;
 
 =head1 NAME
 
@@ -74,6 +75,7 @@ sub run {
 sub begin {
     my ($self) = @_;
 
+	my @voices;
     my $conf = new Config::General( File::Spec->rel2abs( File::Spec->curdir() ) . "/kakapo.conf" );
     my %config = $conf->getall;
 
@@ -110,20 +112,36 @@ sub begin {
     $self->error_msg("No se pudo iniciar el proceso 'Festival'")
         unless ( connect_festival($self) );
 
-    my $engine = 'Festival';
-    my @voices = Speech::Synthesis->InstalledVoices( engine => $engine );
+	if ( $self->{syn_default} eq 'Festival' ) {
+	    my $engine = 'Festival';
+    	@voices = Speech::Synthesis->InstalledVoices( engine => $engine );
 
-    unless ( $voices[0]->{name} ) {
-        my $dialog = $self->error_msg("No tiene ninguna Voz de Festival instalada");
-        exit 0;
-    }
+		my @voices_espeak = chomp( @voices );
+	    $self->{voices}->new_text;
+    	foreach (@voices_espeak) {
+        	$self->{voices}->append_text( $_->{name} );
+	    }
 
-    $self->{voices}->new_text;
-    foreach (@voices) {
-        $self->{voices}->append_text( $_->{name} );
-    }
 
-    $self->{voices}->set_active(0);
+	}elsif ( $self->{syn_default} eq 'Espeak' ){
+		my @voices = `espeak --voices | awk \'{print \$4}\'`;
+
+		$self->{voices}->new_text;
+		for (@voices){
+			unless ( $_ eq 'VoiceName\n' ) {
+			 	$self->{voices}->append_text( $_ );
+			}
+		}
+		$self->{logdebug}->debug("Voices: @voices");
+
+	}
+
+	$self->{voices}->set_active(0);
+
+#    unless ( $voices[0]->{name} ) {
+#        my $dialog = $self->error_msg("No tiene ninguna Voz de Festival instalada");
+#        exit 0;
+#    }
 
 }
 
