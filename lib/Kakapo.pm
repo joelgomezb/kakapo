@@ -112,13 +112,18 @@ sub begin {
     $self->error_msg("No se pudo iniciar el proceso 'Festival'")
         unless ( connect_festival($self) );
 
+	$self->{voices}->set_active(0);
+	while ( $self->{voices}->get_active_text ){
+			$self->{voices}->remove_text(0);
+			$self->{voices}->set_active(0);
+			$self->{logdebug}->debug("Combo Active: " . $self->{voices}->get_active_text);
+	}
+    $self->{voices}->new_text;
 	if ( $self->{syn_default} eq 'Festival' ) {
 	    my $engine = 'Festival';
     	@voices = Speech::Synthesis->InstalledVoices( engine => $engine );
 
-		my @voices_espeak = chomp( @voices );
-	    $self->{voices}->new_text;
-    	foreach (@voices_espeak) {
+    	foreach (@voices) {
         	$self->{voices}->append_text( $_->{name} );
 	    }
 
@@ -126,12 +131,12 @@ sub begin {
 	}elsif ( $self->{syn_default} eq 'Espeak' ){
 		my @voices = `espeak --voices | awk \'{print \$4}\'`;
 
-		$self->{voices}->new_text;
 		for (@voices){
-			unless ( $_ eq 'VoiceName\n' ) {
+			unless ( $_ eq 'VoiceName' ) {
 			 	$self->{voices}->append_text( $_ );
 			}
 		}
+		$self->{voices}->remove_text(0);
 		$self->{logdebug}->debug("Voices: @voices");
 
 	}
@@ -142,6 +147,10 @@ sub begin {
 #        my $dialog = $self->error_msg("No tiene ninguna Voz de Festival instalada");
 #        exit 0;
 #    }
+
+
+	
+
 
 }
 
@@ -246,6 +255,8 @@ sub on_apply_clicked {
         convert( $self, $file, $sel_filter );
         $self->{message_id} = $self->{statusbar}->push( $self->{context_id}, $file );
 
+	}else{
+		$dialog->destroy;
 	}
 }
 
@@ -253,6 +264,7 @@ sub on_apply_clicked {
 sub on_new_clicked {
     my $self = shift;
 
+	$self->{logdebug}->debug("Voices Actived: " . $self->{voices}->get_active_text);
     my $buffer_file = Gtk2::TextBuffer->new;
     $buffer_file->set_text("");
     $self->{text}->set_buffer($buffer_file);
@@ -261,6 +273,8 @@ sub on_new_clicked {
     $self->{play}->set_sensitive(0);
     $self->{statusbar}->push( $self->{context_id}, "" );
     unlink( $self->{tmp} ) if ( -e $self->{tmp} );
+
+
 }
 
 sub on_newitem_activate {
@@ -334,6 +348,8 @@ sub on_pref_apply_activate {
 	$self->{syn_default} = $self->{synthesizer}->get_active_text;
 	$self->{preferences_window}->hide;
 	$self->{message_id} = $self->{statusbar}->push( $self->{context_id}, "Preferences Updated..." );
+
+	$self->begin( $self );
 
 
 }
