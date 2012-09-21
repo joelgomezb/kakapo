@@ -59,7 +59,7 @@ sub convert {
     $self->{playitem}->set_sensitive(0);
 
     load_file( $self, $file ) unless ( -e $self->{tmp} );
-    my $voice = "voice_" . $self->{voices}->get_active_text;
+    my $voice = "voice_" . $self->{voices}->get_active_text if ( $self->{syn_default} eq 'Festival' ) ;
 
 	if ( $self->{syn_default} eq 'Festival' ){
 		$syn_default = 'Festival';
@@ -76,7 +76,7 @@ sub convert {
 }
 
 sub toaudio {
-	my ( $self, $file, $sel_fiter, $voice ) = @_;
+	my ( $self, $file, $sel_fiter, $voice, $syn_default ) = @_;
 
 
     my $dialog2 = Gtk2::MessageDialog->new( $self->{window}, [], 'info', 'GTK_BUTTONS_NONE',
@@ -97,35 +97,67 @@ sub toaudio {
                                               return FALSE;
                                              } });
 
-    open FH, "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)' 1>> $self->{logfile}  2>&1 |" or error_msg( $! );
-	$progress->set_text("Creating Wav File");
-	open FH2, "lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 |" or error_msg( $! );
-	$progress->set_text("Creating OGG/MP3 File");
+    if ( $syn_default eq 'Festival' ){
 
-    Glib::IO->add_watch(fileno FH, [ 'in', 'hup' ], sub {
-            my ( $fileon, $condition ) = @_;
+		open FH, "text2wave $self->{tmp} -o $self->{wav} -eval '($voice)' 1>> $self->{logfile}  2>&1 |" or error_msg( $! );
+		$progress->set_text("Creating Wav File");
+		open FH2, "lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 |" or error_msg( $! );
+		$progress->set_text("Creating OGG/MP3 File");
 
-            if ( $condition eq 'hup' ) {
-				$dialog2->destroy;
-				my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
-			        "Finished" );
-			    my $resp = $dialog->run;
-			    $dialog->destroy if ( $resp eq "ok" );
-			    $self->{apply}->set_sensitive(1);
-			    $self->{applyitem}->set_sensitive(1);
-			    $self->{play}->set_sensitive(1);
-			    $self->{playitem}->set_sensitive(1);
+	    Glib::IO->add_watch(fileno FH, [ 'in', 'hup' ], sub {
+    	        my ( $fileon, $condition ) = @_;
 
-                close FH;
-                close FH2;
-                return FALSE;
-            }
+        	    if ( $condition eq 'hup' ) {
+					$dialog2->destroy;
+					my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
+				        "Finished" );
+				    my $resp = $dialog->run;
+				    $dialog->destroy if ( $resp eq "ok" );
+				    $self->{apply}->set_sensitive(1);
+			    	$self->{applyitem}->set_sensitive(1);
+				    $self->{play}->set_sensitive(1);
+				    $self->{playitem}->set_sensitive(1);
 
-            return TRUE;
+        	        close FH;
+            	    close FH2;
+                	return FALSE;
+            	}
 
-        }
-    );
+	            return TRUE;
 
+        	}
+    	);
+
+	}elsif( $syn_default eq 'Espeak' ){
+		open FH, "espeak -f $self->{tmp} -w $self->{wav}  1>> $self->{logfile}  2>&1 |" or error_msg( $! );
+		$progress->set_text("Creating Wav File");
+		open FH2, "lame $self->{wav} -o $file  1>> $self->{logfile}  2>&1 |" or error_msg( $! );
+		$progress->set_text("Creating OGG/MP3 File");
+
+		Glib::IO->add_watch(fileno FH, [ 'in', 'hup' ], sub {
+    	        my ( $fileon, $condition ) = @_;
+
+        	    if ( $condition eq 'hup' ) {
+					$dialog2->destroy;
+					my $dialog = Gtk2::MessageDialog->new( $self->{window}, 'destroy-with-parent', 'info', 'ok',
+				        "Finished" );
+				    my $resp = $dialog->run;
+				    $dialog->destroy if ( $resp eq "ok" );
+				    $self->{apply}->set_sensitive(1);
+			    	$self->{applyitem}->set_sensitive(1);
+				    $self->{play}->set_sensitive(1);
+				    $self->{playitem}->set_sensitive(1);
+
+        	        close FH;
+            	    close FH2;
+                	return FALSE;
+            	}
+
+	            return TRUE;
+
+        	});
+
+	}
 }
 
 =head1 AUTHOR
