@@ -260,7 +260,11 @@ sub on_apply_clicked {
 	}
 }
 
+sub on_applyitem_activate {
+    $self = shift;
 
+    $self->on_apply_clicked( $self );
+}
 sub on_new_clicked {
     my $self = shift;
 
