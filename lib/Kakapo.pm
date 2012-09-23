@@ -261,7 +261,7 @@ sub on_apply_clicked {
 }
 
 sub on_applyitem_activate {
-    $self = shift;
+    my $self = shift;
 
     $self->on_apply_clicked( $self );
 }
