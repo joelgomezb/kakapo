@@ -62,7 +62,7 @@ sub load_file {
     $self->{logdebug}->debug($mime_type);
 
     switch ($mime_type) {
-        case "text/plain" { txt( $self, $file ); }
+        case { "text/plain" || "ASCII text" } { txt( $self, $file ); }
         case "application/pdf" { pdf( $self, $file ); }
         case "application/vnd.oasis.opendocument.text" { odt( $self, $file ); }
         case { "application/msword" || "application/vnd.ms-office" }
